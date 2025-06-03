@@ -43,7 +43,7 @@ venv.bak/
 *.ipynb
 
 # Data directories
-data/
+data/clevr
 *.zip
 *.csv
 *.json
@@ -94,5 +94,3 @@ demo_trace*.json
 .env
 secrets.txt
 api_keys.txt
-
-data/clevr
