@@ -95,4 +95,4 @@ demo_trace*.json
 secrets.txt
 api_keys.txt
 
-data/
+data/clevr
