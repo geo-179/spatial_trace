@@ -33,7 +33,7 @@ class CLEVRDataloader:
 if __name__ == "__main__":
     dataloader = CLEVRDataloader()
 
-    sample = dataloader.get_sample(0)
+    sample = dataloader.get_sample(20459)
     print(f"Image: {sample['image_filename']}")
     print(f"Question: {sample['question']}")
     print(f"Answer: {sample['answer']}")
