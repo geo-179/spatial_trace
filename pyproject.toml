@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spatial-trace"
+version = "0.1.0"
+description = "A framework for generating spatial reasoning traces using LLMs and computer vision tools"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+keywords = ["spatial reasoning", "llm", "computer vision", "depth estimation", "segmentation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+
+dependencies = [
+    "openai>=1.0.0",
+    "pandas>=1.3.0",
+    "Pillow>=8.0.0",
+    "numpy>=1.21.0",
+    "pydantic>=2.0.0",
+    "PyYAML>=6.0.0",
+    "python-dotenv>=1.0.0",
+    "pathlib2>=2.3.0; python_version<'3.4'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0.0",
+    "pytest-cov>=2.0.0",
+    "black>=22.0.0",
+    "isort>=5.0.0",
+    "mypy>=0.950",
+    "flake8>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/spatial-trace"
+Repository = "https://github.com/yourusername/spatial-trace"
+Documentation = "https://github.com/yourusername/spatial-trace/docs"
+"Bug Tracker" = "https://github.com/yourusername/spatial-trace/issues"
+
+[project.scripts]
+spatial-trace = "spatial_trace.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["spatial_trace*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--cov=spatial_trace --cov-report=html --cov-report=term-missing" 
