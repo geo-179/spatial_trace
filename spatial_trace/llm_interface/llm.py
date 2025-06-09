@@ -3,8 +3,7 @@ from openai import OpenAI
 
 # The OpenAI client automatically looks for the OPENAI_API_KEY environment variable.
 # If you don't set it as an environment variable, you can pass it directly:
-client = OpenAI(api_key="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")
-# client = OpenAI()
+client = OpenAI()
 
 try:
     # This is the basic API call to the GPT-4o model
