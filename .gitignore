@@ -45,7 +45,6 @@ venv.bak/
 # Data directories
 data/clevr
 *.zip
-*.csv
 *.json
 *.jsonl
 *.parquet

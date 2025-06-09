@@ -1,0 +1,11 @@
+idx,image_filename,question,answer,image_path
+1421,CLEVR_train_000142.png,Is there any other thing that has the same size as the yellow rubber block?,no,images/CLEVR_train_000142.png
+2375,CLEVR_train_000237.png,How many cylinders are the same size as the red thing?,3,images/CLEVR_train_000237.png
+4113,CLEVR_train_000411.png,Are there any red objects of the same size as the cyan metal object?,yes,images/CLEVR_train_000411.png
+5156,CLEVR_train_000515.png,Is the big matte ball the same color as the large shiny thing?,yes,images/CLEVR_train_000515.png
+8732,CLEVR_train_000873.png,Is there any other thing that has the same size as the purple thing?,yes,images/CLEVR_train_000873.png
+10246,CLEVR_train_001024.png,How many big red cubes are there?,1,images/CLEVR_train_001024.png
+13104,CLEVR_train_001310.png,There is a green rubber object that is in front of the large object; does it have the same size as the ball to the left of the big thing?,yes,images/CLEVR_train_001310.png
+20459,CLEVR_train_002045.png,Is the purple ball that is left of the red cylinder made of the same material as the tiny cylinder?,yes,images/CLEVR_train_002045.png
+27035,CLEVR_train_002703.png,Is the number of small blue cylinders behind the small rubber sphere less than the number of rubber things?,yes,images/CLEVR_train_002703.png
+31551,CLEVR_train_003155.png,There is a cyan matte thing; does it have the same size as the shiny ball left of the blue shiny cube?,no,images/CLEVR_train_003155.png
