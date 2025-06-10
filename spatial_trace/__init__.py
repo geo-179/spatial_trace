@@ -8,7 +8,7 @@ spatial reasoning traces using Large Language Models and computer vision tools.
 __version__ = "0.1.0"
 
 # Main components
-from .inference import SpatialReasoningPipeline, TraceProcessor
+from .inference import SpatialReasoningPipeline, TraceProcessor, TraceVerifier, VerificationResult
 from .llm_interface import OpenAIClient, BaseLLMClient
 from .tools import tool_registry, SAM2Tool, DAV2Tool
 from .utils import get_logger
@@ -21,21 +21,23 @@ def create_pipeline(**kwargs):
 __all__ = [
     # Main pipeline
     "SpatialReasoningPipeline",
-    "TraceProcessor", 
+    "TraceProcessor",
+    "TraceVerifier",
+    "VerificationResult",
     "create_pipeline",
-    
+
     # LLM clients
     "OpenAIClient",
     "BaseLLMClient",
-    
+
     # Tools
     "tool_registry",
     "SAM2Tool",
     "DAV2Tool",
-    
+
     # Utilities
     "get_logger",
-    
+
     # Package info
     "__version__"
 ]
