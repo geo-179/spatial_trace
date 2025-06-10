@@ -1,0 +1,201 @@
+idx,image_index,image_filename,question,answer,difficulty,split,image_path
+13378,13572,CLEVR_train_013572.png,how many cylinders are in the image,2,human,train,images/CLEVR_train_013572.png
+838,822,CLEVR_train_000822.png,Are all the balls the same size?,no,human,train,images/CLEVR_train_000822.png
+16550,10367,CLEVR_train_010367.png,Are any of the cylinders red and shiny?,yes,human,train,images/CLEVR_train_010367.png
+12576,12232,CLEVR_train_012232.png,What is the shape of the only large item?,cube,human,train,images/CLEVR_train_012232.png
+3701,4649,CLEVR_train_004649.png,Are the two large cylinders both shiny?,yes,human,train,images/CLEVR_train_004649.png
+7509,5637,CLEVR_train_005637.png,Is the cube in the back shiny green?,no,human,train,images/CLEVR_train_005637.png
+15853,14875,CLEVR_train_014875.png,"the largest cube and sphere are the same material, true or false?",yes,human,train,images/CLEVR_train_014875.png
+14687,13243,CLEVR_train_013243.png,What material is mostly shown?,rubber,human,train,images/CLEVR_train_013243.png
+7870,5919,CLEVR_train_005919.png,How many gold objects are there?,1,human,train,images/CLEVR_train_005919.png
+10117,11622,CLEVR_train_011622.png,Are the two cubes the same color as the cylinder?,no,human,train,images/CLEVR_train_011622.png
+7661,5922,CLEVR_train_005922.png,There is a green sphere; is it the same size as the metal object?,no,human,train,images/CLEVR_train_005922.png
+12173,17464,CLEVR_train_017464.png,Are the two balls the same color?,no,human,train,images/CLEVR_train_017464.png
+17254,14001,CLEVR_train_014001.png,What shape is the object that cannot be fully seen?,cube,human,train,images/CLEVR_train_014001.png
+7506,5163,CLEVR_train_005163.png,"How many things are spheres, but not red?",2,human,train,images/CLEVR_train_005163.png
+12253,17232,CLEVR_train_017232.png,how many objects are round? ,3,human,train,images/CLEVR_train_017232.png
+8898,6732,CLEVR_train_006732.png,Are both of the large spheres the same material?,yes,human,train,images/CLEVR_train_006732.png
+15924,10064,CLEVR_train_010064.png,is the reflection on the small blue sphere visible?,no,human,train,images/CLEVR_train_010064.png
+8607,7311,CLEVR_train_007311.png,How many spheres are there?,5,human,train,images/CLEVR_train_007311.png
+6919,8441,CLEVR_train_008441.png,Are the green spheres metallic?,yes,human,train,images/CLEVR_train_008441.png
+7822,9572,CLEVR_train_009572.png,How many purple objects are there?,3,human,train,images/CLEVR_train_009572.png
+15378,10386,CLEVR_train_010386.png,How many purple objects are there?,1,human,train,images/CLEVR_train_010386.png
+12958,13475,CLEVR_train_013475.png,How many objects are either purple or shiny?,4,human,train,images/CLEVR_train_013475.png
+7006,8475,CLEVR_train_008475.png,What color is the largest shiny object?,cyan,human,train,images/CLEVR_train_008475.png
+15779,19888,CLEVR_train_019888.png,How many cubes are red?,0,human,train,images/CLEVR_train_019888.png
+17195,19096,CLEVR_train_019096.png,Are any of the yellow objects square?,yes,human,train,images/CLEVR_train_019096.png
+17681,17762,CLEVR_train_017762.png,Are any of the objects red?,yes,human,train,images/CLEVR_train_017762.png
+7841,6543,CLEVR_train_006543.png,how many are cylinders but neither gold or yellow?,1,human,train,images/CLEVR_train_006543.png
+4104,398,CLEVR_train_000398.png,What color is the cube?,gray,human,train,images/CLEVR_train_000398.png
+206,3603,CLEVR_train_003603.png,Are any of the cylinders metallic?,yes,human,train,images/CLEVR_train_003603.png
+6258,9486,CLEVR_train_009486.png,Are there any metallic objects?,no,human,train,images/CLEVR_train_009486.png
+6034,5524,CLEVR_train_005524.png,is there a small cube the same color as a large cube?,no,human,train,images/CLEVR_train_005524.png
+15620,12085,CLEVR_train_012085.png,What object is closest to the shiny ball?,cube,human,train,images/CLEVR_train_012085.png
+13460,16303,CLEVR_train_016303.png,Is there two objects of the same color in this picture?,yes,human,train,images/CLEVR_train_016303.png
+3630,882,CLEVR_train_000882.png,What shape is the object behind the purple ball?,cube,human,train,images/CLEVR_train_000882.png
+9457,11261,CLEVR_train_011261.png,What shape is the small yellow object behind the silver ball?,cylinder,human,train,images/CLEVR_train_011261.png
+6300,9456,CLEVR_train_009456.png,Are all the red objects shiny?,yes,human,train,images/CLEVR_train_009456.png
+16361,12231,CLEVR_train_012231.png,What is the only color shared by more than one object?,cyan,human,train,images/CLEVR_train_012231.png
+7995,6265,CLEVR_train_006265.png,Is there a purple cylinder?,yes,human,train,images/CLEVR_train_006265.png
+6174,7992,CLEVR_train_007992.png,Are there more spheres than other shaped object?,no,human,train,images/CLEVR_train_007992.png
+6749,6174,CLEVR_train_006174.png,Are there more shiny things or brown things in this photo?,metal,human,train,images/CLEVR_train_006174.png
+3005,1828,CLEVR_train_001828.png,Is the blue cylinder the same shape as the one in front of it?,no,human,train,images/CLEVR_train_001828.png
+16411,15354,CLEVR_train_015354.png,Are the two small objects on the left?,no,human,train,images/CLEVR_train_015354.png
+9138,10941,CLEVR_train_010941.png,How many spheres are metallic?,2,human,train,images/CLEVR_train_010941.png
+10400,12586,CLEVR_train_012586.png,What shape object does the matte objects have that are not present in the metal objects?,cylinder,human,train,images/CLEVR_train_012586.png
+9553,12346,CLEVR_train_012346.png,Are there more shiny squares than matte ones?,yes,human,train,images/CLEVR_train_012346.png
+8,3113,CLEVR_train_003113.png,What color is the object farthest back?,gray,human,train,images/CLEVR_train_003113.png
+4644,9729,CLEVR_train_009729.png,How many cylinders are to the left of the blue cylinder?,1,human,train,images/CLEVR_train_009729.png
+6364,8811,CLEVR_train_008811.png,Are all of the gray items in the front of the image?,yes,human,train,images/CLEVR_train_008811.png
+14450,14396,CLEVR_train_014396.png,what color is the metallic cube,red,human,train,images/CLEVR_train_014396.png
+9442,13125,CLEVR_train_013125.png,Are all the balls the same size?,no,human,train,images/CLEVR_train_013125.png
+13090,15421,CLEVR_train_015421.png,How many cylinders are the same material as the cyan sphere?,4,human,train,images/CLEVR_train_015421.png
+1254,3111,CLEVR_train_003111.png,Are any of the objects red?,no,human,train,images/CLEVR_train_003111.png
+15988,19508,CLEVR_train_019508.png,How many cubes are there?,0,human,train,images/CLEVR_train_019508.png
+11488,12221,CLEVR_train_012221.png,What is the shape of the yellow object?,cube,human,train,images/CLEVR_train_012221.png
+7934,5522,CLEVR_train_005522.png,how many objects are cubes but not the same color as the leftmost cylinder?,1,human,train,images/CLEVR_train_005522.png
+6921,9128,CLEVR_train_009128.png,How many metallic objects are the same color?,2,human,train,images/CLEVR_train_009128.png
+2076,1122,CLEVR_train_001122.png,Are any of the objects the same shape?,yes,human,train,images/CLEVR_train_001122.png
+6280,9882,CLEVR_train_009882.png,Is there a purple cube?,yes,human,train,images/CLEVR_train_009882.png
+10722,10359,CLEVR_train_010359.png,Are there more spheres than cubes?,no,human,train,images/CLEVR_train_010359.png
+13364,14820,CLEVR_train_014820.png,"If you stacked the gray items, would they be taller than all the cubes stacked?",no,human,train,images/CLEVR_train_014820.png
+9839,19064,CLEVR_train_019064.png,What color is the small block?,green,human,train,images/CLEVR_train_019064.png
+10291,17461,CLEVR_train_017461.png,What shape is the yellow object?,cube,human,train,images/CLEVR_train_017461.png
+10770,14588,CLEVR_train_014588.png,"If the green cube was stacked on top of the red cube, would they be taller than the red sphere?",yes,human,train,images/CLEVR_train_014588.png
+10571,14283,CLEVR_train_014283.png,What is the shape of the small object that is the same color as the large square?,cylinder,human,train,images/CLEVR_train_014283.png
+1342,3510,CLEVR_train_003510.png,Is there purple cylinder in the center?,no,human,train,images/CLEVR_train_003510.png
+1089,2017,CLEVR_train_002017.png,How many of the items have a reflection?,2,human,train,images/CLEVR_train_002017.png
+1184,3156,CLEVR_train_003156.png,"There is a large blue thing next to a small bronze globe, but the small globe to the north of the bronze globe is what color?",green,human,train,images/CLEVR_train_003156.png
+4562,8027,CLEVR_train_008027.png,Are all the spheres rubber?,no,human,train,images/CLEVR_train_008027.png
+15791,14404,CLEVR_train_014404.png,what is the color of  the object between purple matte cylinder and tiny purple block ?,gray,human,train,images/CLEVR_train_014404.png
+3652,3560,CLEVR_train_003560.png,how many small objects are to the left of the big purple block,2,human,train,images/CLEVR_train_003560.png
+11022,19801,CLEVR_train_019801.png,How many of the cubes are larger than the shiny object?,1,human,train,images/CLEVR_train_019801.png
+4768,8774,CLEVR_train_008774.png,Are there any green objects in the picture?,no,human,train,images/CLEVR_train_008774.png
+5479,9609,CLEVR_train_009609.png,"What is the object that is metal, but not a sphere?",cylinder,human,train,images/CLEVR_train_009609.png
+13092,10152,CLEVR_train_010152.png,Are the purple things and the big thing the same shape?,yes,human,train,images/CLEVR_train_010152.png
+12134,13752,CLEVR_train_013752.png,Is there a rubber sphere?,yes,human,train,images/CLEVR_train_013752.png
+9968,10158,CLEVR_train_010158.png,Are all the objects the same color?,no,human,train,images/CLEVR_train_010158.png
+3844,927,CLEVR_train_000927.png,How many shiny things are the same color as the rubber cylinder?,2,human,train,images/CLEVR_train_000927.png
+16214,11318,CLEVR_train_011318.png,is the gray sphere the same material as the others?,no,human,train,images/CLEVR_train_011318.png
+7433,9388,CLEVR_train_009388.png,Are any of the objects matte?,no,human,train,images/CLEVR_train_009388.png
+10486,13133,CLEVR_train_013133.png,Is there a green shiny ball?,yes,human,train,images/CLEVR_train_013133.png
+9790,11246,CLEVR_train_011246.png,How many gray cubes are there?,1,human,train,images/CLEVR_train_011246.png
+16138,14171,CLEVR_train_014171.png,how many shiny objects are there?,5,human,train,images/CLEVR_train_014171.png
+15316,13556,CLEVR_train_013556.png,How many different shapes are there?,3,human,train,images/CLEVR_train_013556.png
+2275,3943,CLEVR_train_003943.png,How many objects are opaque in color?,4,human,train,images/CLEVR_train_003943.png
+7366,7423,CLEVR_train_007423.png,Are there three red items?,yes,human,train,images/CLEVR_train_007423.png
+9116,15440,CLEVR_train_015440.png,How many small balls are there?,1,human,train,images/CLEVR_train_015440.png
+1894,2312,CLEVR_train_002312.png,What shape is the item found closest to the small red cube?,sphere,human,train,images/CLEVR_train_002312.png
+10736,19711,CLEVR_train_019711.png,Are any of the cylinders silver?,yes,human,train,images/CLEVR_train_019711.png
+3041,2939,CLEVR_train_002939.png,How many of these items are metallic?,5,human,train,images/CLEVR_train_002939.png
+17680,18165,CLEVR_train_018165.png,what color is dominating in the shapes?,purple,human,train,images/CLEVR_train_018165.png
+2810,2190,CLEVR_train_002190.png,Is there a silver cylinder?,yes,human,train,images/CLEVR_train_002190.png
+2764,1524,CLEVR_train_001524.png,What object is farthest from the red ball?,cube,human,train,images/CLEVR_train_001524.png
+3728,2364,CLEVR_train_002364.png,How many blue cubes are in the frame?,0,human,train,images/CLEVR_train_002364.png
+14327,19072,CLEVR_train_019072.png,How many rubber spheres are there?,0,human,train,images/CLEVR_train_019072.png
+11304,15594,CLEVR_train_015594.png,how many different kinds of shapes are there,3,human,train,images/CLEVR_train_015594.png
+15166,16357,CLEVR_train_016357.png,What shape is the green object?,cylinder,human,train,images/CLEVR_train_016357.png
+9240,17377,CLEVR_train_017377.png,What color is the smallestt item?,brown,human,train,images/CLEVR_train_017377.png
+4753,8930,CLEVR_train_008930.png,How many objects are blue and shiny?,2,human,train,images/CLEVR_train_008930.png
+6498,8129,CLEVR_train_008129.png,How many spheres are pictured?,4,human,train,images/CLEVR_train_008129.png
+318,3270,CLEVR_train_003270.png,What color is the object on the far right?,yellow,human,train,images/CLEVR_train_003270.png
+10769,16131,CLEVR_train_016131.png,Are all of the cubes the same material?,yes,human,train,images/CLEVR_train_016131.png
+4519,6210,CLEVR_train_006210.png,what color is the largest cylinder?,yellow,human,train,images/CLEVR_train_006210.png
+5270,5179,CLEVR_train_005179.png,what is the only shape in the picture,sphere,human,train,images/CLEVR_train_005179.png
+16664,19549,CLEVR_train_019549.png,How many brown things are there?,1,human,train,images/CLEVR_train_019549.png
+5837,8460,CLEVR_train_008460.png,What is the color of the cylinder?,green,human,train,images/CLEVR_train_008460.png
+16475,19250,CLEVR_train_019250.png,What is the material of the object to the right of the large metallic cylinder?,rubber,human,train,images/CLEVR_train_019250.png
+3260,328,CLEVR_train_000328.png,Are all the objects matte?,no,human,train,images/CLEVR_train_000328.png
+5641,5344,CLEVR_train_005344.png,How many cubes are to the right of the yellow object?,2,human,train,images/CLEVR_train_005344.png
+2180,4226,CLEVR_train_004226.png,How many of the objects have the color green?,3,human,train,images/CLEVR_train_004226.png
+16223,13170,CLEVR_train_013170.png,Are all the items metallic?,no,human,train,images/CLEVR_train_013170.png
+8106,7891,CLEVR_train_007891.png,The small yellow cylinder is what material?,rubber,human,train,images/CLEVR_train_007891.png
+1436,2742,CLEVR_train_002742.png,What color of item is set out the most?,blue,human,train,images/CLEVR_train_002742.png
+16334,17573,CLEVR_train_017573.png,What is the most common shape?,sphere,human,train,images/CLEVR_train_017573.png
+13216,10717,CLEVR_train_010717.png,is there any object in front of the red cylinder?,no,human,train,images/CLEVR_train_010717.png
+10254,15891,CLEVR_train_015891.png,What is the shape of the object to the right of the red object?,sphere,human,train,images/CLEVR_train_015891.png
+2031,3370,CLEVR_train_003370.png,Are there any cylinders?,no,human,train,images/CLEVR_train_003370.png
+12049,16819,CLEVR_train_016819.png,Is the small cube the same material as the large cube?,no,human,train,images/CLEVR_train_016819.png
+17352,11575,CLEVR_train_011575.png,"What object comes in both small and large sizes, and is only shiny?",cylinder,human,train,images/CLEVR_train_011575.png
+147,930,CLEVR_train_000930.png,How many lights are reflective in the photo?,4,human,train,images/CLEVR_train_000930.png
+7393,8286,CLEVR_train_008286.png,How many shiny objects are there?,4,human,train,images/CLEVR_train_008286.png
+2846,2574,CLEVR_train_002574.png,"Which shape is present twice with the same size, material, and color?",cube,human,train,images/CLEVR_train_002574.png
+891,1783,CLEVR_train_001783.png,Are there any silver things?,yes,human,train,images/CLEVR_train_001783.png
+17682,16422,CLEVR_train_016422.png,What color is the large ball?,purple,human,train,images/CLEVR_train_016422.png
+14583,18340,CLEVR_train_018340.png,How many of the objects are smaller than the cylinder?,4,human,train,images/CLEVR_train_018340.png
+4975,6472,CLEVR_train_006472.png,Is the small yellow sphere shiny?,yes,human,train,images/CLEVR_train_006472.png
+11484,14966,CLEVR_train_014966.png,How many balls are there?,1,human,train,images/CLEVR_train_014966.png
+3010,4953,CLEVR_train_004953.png,Is the brown object behind the blue object?,no,human,train,images/CLEVR_train_004953.png
+12183,12471,CLEVR_train_012471.png,What is the shape of the item obscured by the large brown cube?,cube,human,train,images/CLEVR_train_012471.png
+5185,7092,CLEVR_train_007092.png,How many rubber spheres are there?,1,human,train,images/CLEVR_train_007092.png
+5743,6315,CLEVR_train_006315.png,Are all of the shapes cubes?,yes,human,train,images/CLEVR_train_006315.png
+3542,1016,CLEVR_train_001016.png,"If you divide these objects into two groups, based on shape, how many in each of the two groups are large objects?",1,human,train,images/CLEVR_train_001016.png
+10942,17706,CLEVR_train_017706.png,How many items are not large or gray?,3,human,train,images/CLEVR_train_017706.png
+17355,10831,CLEVR_train_010831.png,what color is the rubber object,red,human,train,images/CLEVR_train_010831.png
+2294,3159,CLEVR_train_003159.png,Is the furthest gold thing the same shape as the red rubber thing?,yes,human,train,images/CLEVR_train_003159.png
+2603,67,CLEVR_train_000067.png,What color is the largest orb?,blue,human,train,images/CLEVR_train_000067.png
+2703,2516,CLEVR_train_002516.png,is the large cube object the same color as the large metallic sphere?,no,human,train,images/CLEVR_train_002516.png
+12095,12331,CLEVR_train_012331.png,How many cylinders are there?,2,human,train,images/CLEVR_train_012331.png
+17802,16518,CLEVR_train_016518.png,What is the color of most of the objects?,red,human,train,images/CLEVR_train_016518.png
+10192,18857,CLEVR_train_018857.png,Are all of the cylinders matte?,no,human,train,images/CLEVR_train_018857.png
+2151,1254,CLEVR_train_001254.png,What color is the small cube next to the large red matte sphere?,yellow,human,train,images/CLEVR_train_001254.png
+4650,6285,CLEVR_train_006285.png,Are all green items metal?,no,human,train,images/CLEVR_train_006285.png
+11620,11904,CLEVR_train_011904.png,Ther is a matte object hiding behind another matte object. What color is it?,green,human,train,images/CLEVR_train_011904.png
+11431,14823,CLEVR_train_014823.png,"If the cubes were all shiny, how many shiny objects would there be?",4,human,train,images/CLEVR_train_014823.png
+4126,121,CLEVR_train_000121.png,What color is the small cube?,gray,human,train,images/CLEVR_train_000121.png
+7729,6483,CLEVR_train_006483.png,are eighty percent of the items shown here also matte items?,yes,human,train,images/CLEVR_train_006483.png
+2727,275,CLEVR_train_000275.png,Are all the objects the same shape?,yes,human,train,images/CLEVR_train_000275.png
+17000,14947,CLEVR_train_014947.png,How many of the squares are metallic?,2,human,train,images/CLEVR_train_014947.png
+6670,5745,CLEVR_train_005745.png,How many metal shapes are there?,6,human,train,images/CLEVR_train_005745.png
+14149,13193,CLEVR_train_013193.png,How many cubes are the same material as the green cylinder?,1,human,train,images/CLEVR_train_013193.png
+14289,18535,CLEVR_train_018535.png,How many other objects with the same shape as the red object are rubber?,2,human,train,images/CLEVR_train_018535.png
+1665,4161,CLEVR_train_004161.png,What number objects are remaining once you remove all of the brown objects from the photo?,4,human,train,images/CLEVR_train_004161.png
+10401,15946,CLEVR_train_015946.png,What is the shape of the object that color is not similar to the others?,cube,human,train,images/CLEVR_train_015946.png
+17625,17493,CLEVR_train_017493.png,Are any of the objects the same color?,no,human,train,images/CLEVR_train_017493.png
+8103,8689,CLEVR_train_008689.png,Are any of the small spheres shiny?,yes,human,train,images/CLEVR_train_008689.png
+10369,13052,CLEVR_train_013052.png,How many yellow objects are there?,5,human,train,images/CLEVR_train_013052.png
+17180,12590,CLEVR_train_012590.png,What is the color of the sphere?,purple,human,train,images/CLEVR_train_012590.png
+10304,14071,CLEVR_train_014071.png,Is there a red cube?,yes,human,train,images/CLEVR_train_014071.png
+15064,19412,CLEVR_train_019412.png,How many of the objects are not gray?,1,human,train,images/CLEVR_train_019412.png
+3403,1029,CLEVR_train_001029.png,What color is the ball behind the cyan cube?,green,human,train,images/CLEVR_train_001029.png
+11669,16392,CLEVR_train_016392.png,What is the color of the item between the other two?,purple,human,train,images/CLEVR_train_016392.png
+9306,15197,CLEVR_train_015197.png,Are the objects the same shape?,no,human,train,images/CLEVR_train_015197.png
+14520,10176,CLEVR_train_010176.png,How many objects are shiny?,2,human,train,images/CLEVR_train_010176.png
+6478,9490,CLEVR_train_009490.png,Is the number of spheres greater than  the number of squares?,yes,human,train,images/CLEVR_train_009490.png
+406,1776,CLEVR_train_001776.png,How many blocks are there?,1,human,train,images/CLEVR_train_001776.png
+6918,6461,CLEVR_train_006461.png,Are all the objects the same shape?,no,human,train,images/CLEVR_train_006461.png
+7726,6290,CLEVR_train_006290.png,Are there more cubes than spheres?,yes,human,train,images/CLEVR_train_006290.png
+12446,13573,CLEVR_train_013573.png,how many cyan metallic cubes are there,0,human,train,images/CLEVR_train_013573.png
+10908,12381,CLEVR_train_012381.png,"What is the shape of large objects that has two shiny, and two rubber, yet none share the same color?",cube,human,train,images/CLEVR_train_012381.png
+7953,7154,CLEVR_train_007154.png,How many of the forms are red?,1,human,train,images/CLEVR_train_007154.png
+2544,2804,CLEVR_train_002804.png,Are all of the sphere shaped objects made of metallic material?,yes,human,train,images/CLEVR_train_002804.png
+734,3767,CLEVR_train_003767.png,Are all of the balls matte?,yes,human,train,images/CLEVR_train_003767.png
+13841,13821,CLEVR_train_013821.png,What is the color of the item that is in front of the others?,yellow,human,train,images/CLEVR_train_013821.png
+6606,7568,CLEVR_train_007568.png,Are there any objects the same color as the cube in front?,yes,human,train,images/CLEVR_train_007568.png
+9503,14289,CLEVR_train_014289.png,What material is the cyan sphere?,metal,human,train,images/CLEVR_train_014289.png
+16647,15650,CLEVR_train_015650.png,Is the rightmost object a different color than the object on the farthest left?,yes,human,train,images/CLEVR_train_015650.png
+687,1039,CLEVR_train_001039.png,Is there a cylinder the same size and shape as the metallic gray cylinder?,yes,human,train,images/CLEVR_train_001039.png
+2322,1789,CLEVR_train_001789.png,Are there any matte balls?,yes,human,train,images/CLEVR_train_001789.png
+15323,10279,CLEVR_train_010279.png,what color is the shape closest to the small purple cube,yellow,human,train,images/CLEVR_train_010279.png
+2970,231,CLEVR_train_000231.png,Are there any cylindrical shaped objects in this group?,no,human,train,images/CLEVR_train_000231.png
+11953,19901,CLEVR_train_019901.png,What color is the large ball?,blue,human,train,images/CLEVR_train_019901.png
+14379,13088,CLEVR_train_013088.png,What is the color of the only rubber object?,gray,human,train,images/CLEVR_train_013088.png
+4133,2343,CLEVR_train_002343.png,Are any objects green?,yes,human,train,images/CLEVR_train_002343.png
+6456,8195,CLEVR_train_008195.png,how many small objects that are not metallic?,2,human,train,images/CLEVR_train_008195.png
+14904,13992,CLEVR_train_013992.png,Are there any other objects the same size and shape as the object that is in front of the purple circle?,no,human,train,images/CLEVR_train_013992.png
+6613,5167,CLEVR_train_005167.png,Is there a small green sphere present?,no,human,train,images/CLEVR_train_005167.png
+4743,7287,CLEVR_train_007287.png,Is the sphere in front of the cubes?,yes,human,train,images/CLEVR_train_007287.png
+7718,7960,CLEVR_train_007960.png,Are both spheres the same color?,no,human,train,images/CLEVR_train_007960.png
+17014,15713,CLEVR_train_015713.png,how many cylinders are metallic,2,human,train,images/CLEVR_train_015713.png
+5141,6147,CLEVR_train_006147.png,How many small cubes are there?,3,human,train,images/CLEVR_train_006147.png
+5019,9120,CLEVR_train_009120.png,How many gray cubes are pictured?,2,human,train,images/CLEVR_train_009120.png
+4664,9861,CLEVR_train_009861.png,How many items share the same shape?,4,human,train,images/CLEVR_train_009861.png
+16488,17624,CLEVR_train_017624.png,What color is the object touching the blue cube?,gray,human,train,images/CLEVR_train_017624.png
+1006,1436,CLEVR_train_001436.png,Are there more cylinders or balls?,cylinder,human,train,images/CLEVR_train_001436.png
+16639,18557,CLEVR_train_018557.png,How many objects are large?,1,human,train,images/CLEVR_train_018557.png
+1635,394,CLEVR_train_000394.png,Are all the objects shiny?,no,human,train,images/CLEVR_train_000394.png
+14353,18556,CLEVR_train_018556.png,What is the yellow block made of?,rubber,human,train,images/CLEVR_train_018556.png
+5583,9667,CLEVR_train_009667.png,Is the large cube green?,no,human,train,images/CLEVR_train_009667.png
+1315,2945,CLEVR_train_002945.png,Are there more cylinders or balls?,cylinder,human,train,images/CLEVR_train_002945.png
+2198,2322,CLEVR_train_002322.png,Are there any matte green objects?,cylinder,human,train,images/CLEVR_train_002322.png
+10196,16762,CLEVR_train_016762.png,"If the object on the bottom was viewed straight from above, what shape would someone see?",sphere,human,train,images/CLEVR_train_016762.png
