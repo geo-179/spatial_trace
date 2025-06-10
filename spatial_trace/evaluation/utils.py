@@ -25,6 +25,30 @@ def load_traces(traces_path: Path) -> List[Dict[str, Any]]:
         return []
 
 
+def load_experiment_traces(experiment_dir: Path) -> List[Dict[str, Any]]:
+    """Load all traces from an experiment directory structure."""
+    traces = []
+    questions_dir = experiment_dir / "questions"
+
+    if not questions_dir.exists():
+        logger.error(f"Questions directory not found: {questions_dir}")
+        return traces
+
+    for question_dir in questions_dir.iterdir():
+        if question_dir.is_dir():
+            trace_file = question_dir / "traces" / "complete_trace.json"
+            if trace_file.exists():
+                try:
+                    with open(trace_file, 'r') as f:
+                        trace_data = json.load(f)
+                    traces.append(trace_data)
+                except Exception as e:
+                    logger.error(f"Error loading trace from {trace_file}: {e}")
+
+    logger.info(f"Loaded {len(traces)} traces from experiment {experiment_dir.name}")
+    return traces
+
+
 def load_ground_truth_csv(csv_path: Path,
                          question_col: str = "question",
                          answer_col: str = "answer") -> Dict[str, str]:
@@ -35,6 +59,15 @@ def load_ground_truth_csv(csv_path: Path,
     except Exception as e:
         logger.error(f"Error loading ground truth from {csv_path}: {e}")
         return {}
+
+
+def read_csv_data(csv_path: Path) -> Optional[pd.DataFrame]:
+    """Load data from CSV file."""
+    try:
+        return pd.read_csv(csv_path)
+    except Exception as e:
+        logger.error(f"Error loading CSV from {csv_path}: {e}")
+        return None
 
 
 def load_ground_truth_json(json_path: Path) -> Dict[str, str]:
@@ -128,7 +161,7 @@ def setup_evaluation_logging(log_level: str = "INFO"):
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
             logging.StreamHandler(),
-            logging.FileHandler('evaluation/evaluation.log')
+            logging.FileHandler('spatial_trace/spatial_trace/evaluation/evaluation.log')
         ]
     )
 
@@ -137,10 +170,10 @@ if __name__ == "__main__":
     # Test utilities
     setup_evaluation_logging()
 
-    # Test loading traces if they exist
-    if Path("evaluation/quality_traces.json").exists():
-        traces = load_traces(Path("evaluation/quality_traces.json"))
-        print(f"Loaded {len(traces)} traces")
-
-        answers = extract_final_answers(traces)
-        print(f"Extracted {len([a for a in answers if a])} final answers")
+    # Test loading experiment traces
+    experiments_dir = Path("spatial_trace/spatial_trace/evaluation/experiments")
+    if experiments_dir.exists():
+        for exp_dir in experiments_dir.iterdir():
+            if exp_dir.is_dir():
+                traces = load_experiment_traces(exp_dir)
+                print(f"Experiment {exp_dir.name}: {len(traces)} traces")

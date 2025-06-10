@@ -14,12 +14,16 @@ from spatial_trace.utils import read_csv_data
 from spatial_trace.tools import tool_registry
 from spatial_trace import SpatialReasoningPipeline, TraceProcessor
 
+# First terminal: verify = false
+# Second terminal: verify = true
+
 class Arguments(Tap):
     """Command line arguments for the spatial trace demo."""
     max_steps: int = 10  # Maximum number of reasoning steps
     # question_idx: int = 1  # Index of question to process from dataset
-    number_questions: int = 2 # Number of questions to process from dataset
-    data_dir: str = "data/clevr_easy_subset"  # Path to data directory
+    verify: bool = False
+    number_questions: int = 100 # Number of questions to process from dataset
+    data_dir: str = "data/clevr_human_subset"  # Path to data directory
     output_file: str = "example_trace.json"  # Output file for trace results
 
 def setup_environment():
@@ -68,9 +72,9 @@ def main():
 
     pipeline = SpatialReasoningPipeline(
         max_steps=args.max_steps,
-        enable_verification=True,  
-        min_acceptable_rating=6.0,  
-        max_regeneration_attempts=2  
+        enable_verification=args.verify,
+        min_acceptable_rating=6.0,
+        max_regeneration_attempts=2
     )
 
     print("\nStep 2: Checking System Status")
@@ -104,7 +108,6 @@ def main():
     correct = 0
 
     for question_idx in range(args.number_questions):
-
         first_entry = clevr_data.iloc[question_idx]
 
         question = first_entry['question']
@@ -138,6 +141,9 @@ def main():
 
         final_answer = processor.extract_final_answer(trace)
         print(f"• Final Answer: {final_answer or 'No answer reached'}")
+
+        if final_answer is None:
+            continue
 
         final_answer = final_answer.lower()
 

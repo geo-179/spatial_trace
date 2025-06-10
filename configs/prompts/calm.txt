@@ -1,0 +1,4 @@
+2. `sam2`: A segmentation tool. Call this to identify and outline objects in the image.
+3. `dav2`: A depth estimation tool. Call this to understand the relative distances of objects from the camera.
+
+Note that the BOTTOM of the tool output image is the FRONT, and the TOP is the BACK. The LEFT and RIGHT are the same as normal.

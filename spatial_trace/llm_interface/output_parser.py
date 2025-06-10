@@ -92,7 +92,12 @@ class OutputParser:
 
             # Validate tool name
             tool_name = data["tool_name"]
-            valid_tools = ["sam2", "dav2"]
+            # Import here to avoid circular imports
+            from ..tools import tool_registry
+            valid_tools = tool_registry.list_tools()
+            if not valid_tools:
+                # Fallback to default tools if registry is empty
+                valid_tools = ["sam2", "dav2", "trellis"]
             if tool_name not in valid_tools:
                 return False, f"Invalid tool '{tool_name}'. Valid tools: {valid_tools}"
 

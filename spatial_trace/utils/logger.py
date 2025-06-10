@@ -15,61 +15,63 @@ def setup_logger(
 ) -> logging.Logger:
     """
     Set up a logger with console and optional file output.
-    
+
     Args:
         name: Logger name
         level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         log_file: Optional path to log file
         format_string: Optional custom format string
-        
+
     Returns:
         Configured logger instance
     """
     # Create logger
     logger = logging.getLogger(name)
-    
+
     # Set level
     numeric_level = getattr(logging, level.upper(), logging.INFO)
     logger.setLevel(numeric_level)
-    
+
     # Clear existing handlers to avoid duplicates
     logger.handlers.clear()
-    
-    # Default format
+
+    # Clean format without timestamps - only essential info for console
     if format_string is None:
-        format_string = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    
+        format_string = "%(message)s"  # Only the message, no timestamps or module names
+
     formatter = logging.Formatter(format_string)
-    
+
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(numeric_level)
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
-    
-    # File handler (optional)
+
+    # File handler (optional) - keep detailed format for files
     if log_file:
         log_file = Path(log_file)
         log_file.parent.mkdir(parents=True, exist_ok=True)
-        
+
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(numeric_level)
-        file_handler.setFormatter(formatter)
+        # Keep detailed format for file logging
+        file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
-    
+
     # Prevent propagation to root logger
     logger.propagate = False
-    
+
     return logger
 
 
 def get_logger(name: str = "spatial_trace") -> logging.Logger:
     """
     Get a logger instance.
-    
+
     Args:
         name: Logger name
-        
+
     Returns:
         Logger instance
     """
@@ -79,7 +81,7 @@ def get_logger(name: str = "spatial_trace") -> logging.Logger:
 def set_log_level(level: str, logger_name: str = "spatial_trace") -> None:
     """
     Set logging level for a specific logger.
-    
+
     Args:
         level: New logging level
         logger_name: Name of the logger to update
@@ -87,7 +89,7 @@ def set_log_level(level: str, logger_name: str = "spatial_trace") -> None:
     logger = logging.getLogger(logger_name)
     numeric_level = getattr(logging, level.upper(), logging.INFO)
     logger.setLevel(numeric_level)
-    
+
     # Update all handlers
     for handler in logger.handlers:
         handler.setLevel(numeric_level)
@@ -96,7 +98,7 @@ def set_log_level(level: str, logger_name: str = "spatial_trace") -> None:
 def configure_root_logger(level: str = "WARNING") -> None:
     """
     Configure the root logger to reduce noise from third-party libraries.
-    
+
     Args:
         level: Logging level for root logger
     """
@@ -109,4 +111,4 @@ def configure_root_logger(level: str = "WARNING") -> None:
 main_logger = setup_logger("spatial_trace", level="INFO")
 
 # Configure root logger to reduce third-party noise
-configure_root_logger("WARNING") 
+configure_root_logger("WARNING")

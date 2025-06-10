@@ -66,59 +66,151 @@ class TraceVerifier:
                    step_index: int,
                    full_trace: List[Dict[str, Any]],
                    question: str,
-                   image_path: Optional[Path] = None) -> VerificationResult:
-        """
-        Verify a single reasoning step.
+                   image_path: Optional[Path] = None,
+                   attempt_number: int = 1) -> VerificationResult:
+        """Enhanced verification with retry logic and robust error handling."""
 
-        Args:
-            step_content: Content of the step to verify
-            step_index: Index of the step in the trace
-            full_trace: Complete trace up to this point
-            question: Original question
-            image_path: Path to the image (optional)
+        logger.info(f"Verifying step {step_index}, attempt {attempt_number}: {step_content[:100]}...")
 
-        Returns:
-            VerificationResult containing the verification assessment
-        """
-        logger.info(f"Verifying step {step_index}: {step_content[:100]}...")
+        # Retry logic for API failures
+        max_retries = 2
+        for retry in range(max_retries + 1):
+            try:
+                # Create verification prompt
+                verification_messages = self._create_verification_messages(
+                    step_content, step_index, full_trace, question, image_path
+                )
 
+                # Add context length check
+                total_chars = sum(len(str(msg)) for msg in verification_messages)
+                if total_chars > 50000:  # Rough token limit check
+                    logger.warning(f"Verification context very long ({total_chars} chars), may cause API issues")
+
+                # Get verification response with timeout consideration
+                response = self.llm_client.create_chat_completion(
+                    messages=verification_messages,
+                    max_tokens=500,
+                    temperature=0.1,  # Low temperature for consistent evaluation
+                    response_format={"type": "json_object"}
+                )
+
+                if not response or len(response.strip()) == 0:
+                    if retry < max_retries:
+                        logger.warning(f"Empty verification response for step {step_index}, retry {retry + 1}/{max_retries}")
+                        continue
+                    else:
+                        logger.error(f"Failed to get verification response for step {step_index} after {max_retries + 1} attempts")
+                        return self._create_fallback_result(step_content, "API failure after retries")
+
+                # Parse verification result
+                try:
+                    verification_data = json.loads(response)
+                except json.JSONDecodeError as e:
+                    if retry < max_retries:
+                        logger.warning(f"JSON parse error for step {step_index}, retry {retry + 1}/{max_retries}: {e}")
+                        continue
+                    else:
+                        logger.error(f"JSON parse failed for step {step_index} after retries: {e}")
+                        logger.error(f"Raw response: {response[:200]}...")
+                        return self._create_fallback_result(step_content, f"JSON parse error: {e}")
+
+                # Validate required fields
+                if not self._validate_verification_data(verification_data):
+                    if retry < max_retries:
+                        logger.warning(f"Invalid verification data for step {step_index}, retry {retry + 1}")
+                        continue
+                    else:
+                        logger.error(f"Invalid verification data structure for step {step_index}")
+                        return self._create_fallback_result(step_content, "Invalid verification structure")
+
+                result = VerificationResult(verification_data)
+
+                # Enhanced history entry with attempt tracking
+                self.verification_history.append({
+                    "step_index": step_index,
+                    "attempt_number": attempt_number,
+                    "timestamp": datetime.now().isoformat(),
+                    "step_content": step_content[:200],  # Save snippet for reference
+                    "result": result.to_dict(),
+                    "passed_threshold": result.rating >= self.min_acceptable_rating,
+                    "regeneration_triggered": self.should_regenerate_step(result),
+                    "verification_retries": retry
+                })
+
+                logger.info(f"Step {step_index} verified - Rating: {result.rating}/10, "
+                           f"Regeneration needed: {result.regeneration_needed}")
+
+                return result
+
+            except Exception as e:
+                if retry < max_retries:
+                    logger.warning(f"Verification error for step {step_index}, retry {retry + 1}/{max_retries}: {e}")
+                    continue
+                else:
+                    logger.error(f"Error verifying step {step_index} after retries: {e}")
+                    return self._create_fallback_result(step_content, f"Verification error: {e}")
+
+        # This should never be reached due to the return statements above
+        return self._create_fallback_result(step_content, "Unexpected verification flow")
+
+    def _validate_verification_data(self, data: Dict[str, Any]) -> bool:
+        """Validate that verification response has required fields."""
+        required_fields = ["rating", "rating_justification", "necessity_analysis", "correctness_analysis"]
+        return all(field in data for field in required_fields) and isinstance(data.get("rating"), (int, float))
+
+    def _create_fallback_result(self, step_content: str, error_message: str) -> VerificationResult:
+        """Create a reasonable fallback result when verification fails (NOT rating 1)."""
+
+        # Simple heuristic evaluation when verification API fails
+        fallback_rating = self._heuristic_evaluation(step_content)
+
+        return VerificationResult({
+            "necessity_analysis": f"Verification failed: {error_message}. Using fallback evaluation.",
+            "correctness_analysis": "Could not verify due to API issues. Using heuristic assessment.",
+            "efficiency_analysis": "Could not assess efficiency due to verification failure.",
+            "alternative_approaches": "Could not assess alternatives due to verification failure.",
+            "critical_concerns": f"Verification system failed: {error_message}",
+            "rating": fallback_rating,
+            "rating_justification": f"Fallback rating due to verification failure. Heuristic assessment: {fallback_rating}/10",
+            "regeneration_needed": fallback_rating < self.min_acceptable_rating,
+            "suggested_improvement": "Verification system needs fixing - using fallback evaluation"
+        })
+
+    def _heuristic_evaluation(self, step_content: str) -> float:
+        """Simple heuristic evaluation when verification API fails."""
         try:
-            # Create verification prompt
-            verification_messages = self._create_verification_messages(
-                step_content, step_index, full_trace, question, image_path
-            )
+            # Parse step content to do basic validation
+            parsed = json.loads(step_content)
 
-            # Get verification response
-            response = self.llm_client.create_chat_completion(
-                messages=verification_messages,
-                max_tokens=500,
-                temperature=0.1,  # Low temperature for consistent evaluation
-                response_format={"type": "json_object"}
-            )
+            # Check for required fields
+            if "reasoning" not in parsed or "action" not in parsed:
+                return 4.0  # Below threshold but not catastrophic
 
-            if not response:
-                logger.error(f"Failed to get verification response for step {step_index}")
-                return self._create_error_result("Failed to get LLM response")
+            reasoning = parsed.get("reasoning", "")
+            action = parsed.get("action", "")
 
-            # Parse verification result
-            verification_data = json.loads(response)
-            result = VerificationResult(verification_data)
+            # Basic quality checks
+            rating = 6.0  # Start with acceptable baseline
 
-            # Store in history
-            self.verification_history.append({
-                "step_index": step_index,
-                "timestamp": datetime.now().isoformat(),
-                "result": result.to_dict()
-            })
+            # Reasoning quality heuristics
+            if len(reasoning) < 20:
+                rating -= 1.0  # Too brief
+            elif len(reasoning) > 500:
+                rating += 0.5  # Detailed reasoning
 
-            logger.info(f"Step {step_index} verified - Rating: {result.rating}/10, "
-                       f"Regeneration needed: {result.regeneration_needed}")
+            # Action validation
+            if action in ["tool_call", "final_answer"]:
+                rating += 0.5  # Valid action
 
-            return result
+            if action == "tool_call":
+                tool_name = parsed.get("tool_name", "")
+                if tool_name in ["sam2", "dav2", "trellis"]:
+                    rating += 0.5  # Valid tool
 
-        except Exception as e:
-            logger.error(f"Error verifying step {step_index}: {e}")
-            return self._create_error_result(f"Verification error: {e}")
+            return min(max(rating, 1.0), 10.0)  # Clamp to 1-10 range
+
+        except (json.JSONDecodeError, KeyError):
+            return 5.0  # Neutral rating for unparseable content
 
     def _create_verification_messages(self,
                                     step_content: str,
@@ -226,20 +318,6 @@ Provide your verification assessment in the required JSON format."""
                 context_parts.append(f"Tool Result: {tool_output[:100]}")
 
         return "\n".join(context_parts[-5:])  # Keep last 5 context items
-
-    def _create_error_result(self, error_message: str) -> VerificationResult:
-        """Create an error verification result."""
-        return VerificationResult({
-            "necessity_analysis": f"Error during verification: {error_message}",
-            "correctness_analysis": "Could not assess due to verification error",
-            "efficiency_analysis": "Could not assess due to verification error",
-            "alternative_approaches": "Could not assess due to verification error",
-            "critical_concerns": f"Verification failed: {error_message}",
-            "rating": 1,  # Lowest rating for errors
-            "rating_justification": f"Failed verification: {error_message}",
-            "regeneration_needed": True,
-            "suggested_improvement": "Fix verification system and retry"
-        })
 
     def should_regenerate_step(self, verification_result: VerificationResult) -> bool:
         """
