@@ -17,7 +17,8 @@ from spatial_trace import SpatialReasoningPipeline, TraceProcessor
 class Arguments(Tap):
     """Command line arguments for the spatial trace demo."""
     max_steps: int = 10  # Maximum number of reasoning steps
-    question_idx: int = 1  # Index of question to process from dataset
+    # question_idx: int = 1  # Index of question to process from dataset
+    number_questions: int = 2 # Number of questions to process from dataset
     data_dir: str = "data/clevr_easy_subset"  # Path to data directory
     output_file: str = "example_trace.json"  # Output file for trace results
 
@@ -98,70 +99,86 @@ def main():
     print(f"• Loaded {len(clevr_data)} samples")
 
     print("\nStep 4: Processing Dataset Entry")
-    first_entry = clevr_data.iloc[args.question_idx]
 
-    question = first_entry['question']
-    image_path = script_dir / args.data_dir / first_entry['image_path']
+    total = 0
+    correct = 0
 
-    print(f"• Question: {question}")
-    print(f"• Image: {image_path}")
+    for question_idx in range(args.number_questions):
 
-    if not image_path.exists():
-        print(f"\nERROR: Image not found at {image_path}")
-        return
+        first_entry = clevr_data.iloc[question_idx]
 
-    print("\nStep 5: Generating Reasoning Trace with Verification")
-    trace = pipeline.generate_reasoning_trace(question, image_path)
+        question = first_entry['question']
+        answer = first_entry['answer']
+        image_path = script_dir / args.data_dir / first_entry['image_path']
 
-    if not trace:
-        print("\nERROR: Failed to generate reasoning trace")
-        return
+        print(f"• Question: {question}")
+        print(f"• Image: {image_path}")
 
-    print(f"• Generated trace with {len(trace)} messages")
+        if not image_path.exists():
+            print(f"\nERROR: Image not found at {image_path}")
+            return
 
-    verification_history = pipeline.get_verification_history()
-    if verification_history:
-        print(f"• Verification performed on {len(verification_history)} steps")
-        avg_rating = sum(v["result"]["rating"] for v in verification_history) / len(verification_history)
-        print(f"• Average step rating: {avg_rating:.1f}/10")
+        print("\nStep 5: Generating Reasoning Trace with Verification")
+        trace = pipeline.generate_reasoning_trace(question, image_path)
 
-    print("\nStep 6: Processing Trace Results")
-    processor = TraceProcessor()
+        if not trace:
+            print("\nERROR: Failed to generate reasoning trace")
+            return
 
-    final_answer = processor.extract_final_answer(trace)
-    print(f"• Final Answer: {final_answer or 'No answer reached'}")
+        print(f"• Generated trace with {len(trace)} messages")
 
-    analysis = processor.analyze_trace(trace)
-    print(f"• Tool calls made: {analysis['tool_call_count']}")
-    print(f"• Reasoning steps: {analysis['reasoning_step_count']}")
+        verification_history = pipeline.get_verification_history()
+        if verification_history:
+            print(f"• Verification performed on {len(verification_history)} steps")
+            avg_rating = sum(v["result"]["rating"] for v in verification_history) / len(verification_history)
+            print(f"• Average step rating: {avg_rating:.1f}/10")
 
-    if analysis.get('tool_usage'):
-        print("\nTool Usage:")
-        for tool, count in analysis['tool_usage'].items():
-            print(f"• {tool}: {count} times")
+        print("\nStep 6: Processing Trace Results")
+        processor = TraceProcessor()
 
-    output_path = script_dir / args.output_file
-    success = processor.save_trace_with_analysis(
-        trace, output_path, question, image_path, verification_history
-    )
+        final_answer = processor.extract_final_answer(trace)
+        print(f"• Final Answer: {final_answer or 'No answer reached'}")
 
-    if success:
-        print(f"\nStep 7: Saving Results")
-        print(f"Trace data saved to: {output_path}")
+        final_answer = final_answer.lower()
 
-        verification_path = script_dir / f"verification_history_{args.question_idx}.json"
-        if pipeline.save_verification_history(verification_path):
-            print(f"• Verification history saved to: {verification_path}")
-    else:
-        print("\nERROR: Failed to save trace")
+        if final_answer == answer:
+            correct += 1
+        total += 1
 
-    print("\nStep 8: Trace Summary")
-    summary = processor.create_trace_summary(trace)
-    print(summary)
+        analysis = processor.analyze_trace(trace)
+        print(f"• Tool calls made: {analysis['tool_call_count']}")
+        print(f"• Reasoning steps: {analysis['reasoning_step_count']}")
 
-    print("\n" + "=" * 50)
-    print("Example completed successfully!")
-    print("=" * 50)
+        if analysis.get('tool_usage'):
+            print("\nTool Usage:")
+            for tool, count in analysis['tool_usage'].items():
+                print(f"• {tool}: {count} times")
+
+        output_path = script_dir / args.output_file
+        success = processor.save_trace_with_analysis(
+            trace, output_path, question, image_path, verification_history
+        )
+
+        if success:
+            print(f"\nStep 7: Saving Results")
+            print(f"Trace data saved to: {output_path}")
+
+            verification_path = script_dir / f"verification_history_{question_idx}.json"
+            if pipeline.save_verification_history(verification_path):
+                print(f"• Verification history saved to: {verification_path}")
+        else:
+            print("\nERROR: Failed to save trace")
+
+        print("\nStep 8: Trace Summary")
+        summary = processor.create_trace_summary(trace)
+        print(summary)
+
+        print("\n" + "=" * 50)
+        print("Example completed successfully!")
+        print("=" * 50)
+
+    print(f"Correctness: {correct} out of {total}")
+    print(f"{100 * correct/total}% correct")
 
 
 if __name__ == "__main__":
