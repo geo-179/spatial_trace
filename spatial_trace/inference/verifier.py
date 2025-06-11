@@ -72,25 +72,21 @@ class TraceVerifier:
 
         logger.info(f"Verifying step {step_index}, attempt {attempt_number}: {step_content[:100]}...")
 
-        # Retry logic for API failures
         max_retries = 3
         for retry in range(max_retries + 1):
             try:
-                # Create verification prompt
                 verification_messages = self._create_verification_messages(
                     step_content, step_index, full_trace, question, image_path
                 )
 
-                # Add context length check
                 total_chars = sum(len(str(msg)) for msg in verification_messages)
-                if total_chars > 50000:  # Rough token limit check
+                if total_chars > 50000:
                     logger.warning(f"Verification context very long ({total_chars} chars), may cause API issues")
 
-                # Get verification response with timeout consideration
                 response = self.llm_client.create_chat_completion(
                     messages=verification_messages,
                     max_tokens=500,
-                    temperature=0.1,  # Low temperature for consistent evaluation
+                    temperature=0.1,
                     response_format={"type": "json_object"}
                 )
 
@@ -102,7 +98,6 @@ class TraceVerifier:
                         logger.error(f"Failed to get verification response for step {step_index} after {max_retries + 1} attempts")
                         return self._create_fallback_result(step_content, "API failure after retries")
 
-                # Parse verification result
                 try:
                     verification_data = json.loads(response)
                 except json.JSONDecodeError as e:
@@ -114,7 +109,6 @@ class TraceVerifier:
                         logger.error(f"Raw response: {response[:200]}...")
                         return self._create_fallback_result(step_content, f"JSON parse error: {e}")
 
-                # Validate required fields
                 if not self._validate_verification_data(verification_data):
                     if retry < max_retries:
                         logger.warning(f"Invalid verification data for step {step_index}, retry {retry + 1}")
@@ -125,10 +119,8 @@ class TraceVerifier:
 
                 result = VerificationResult(verification_data)
 
-                # Determine the authoritative regeneration decision based on our threshold.
                 authoritative_regeneration_needed = self.should_regenerate_step(result)
 
-                # Log both the LLM's suggestion and our final decision for clarity.
                 logger.info(
                     f"Step {step_index} verified - Rating: {result.rating}/10, "
                     f"LLM Suggestion: {result.regeneration_needed}, "
@@ -189,38 +181,33 @@ class TraceVerifier:
     def _heuristic_evaluation(self, step_content: str) -> float:
         """Simple heuristic evaluation when verification API fails."""
         try:
-            # Parse step content to do basic validation
             parsed = json.loads(step_content)
 
-            # Check for required fields
             if "reasoning" not in parsed or "action" not in parsed:
-                return 4.0  # Below threshold but not catastrophic
+                return 4.0
 
             reasoning = parsed.get("reasoning", "")
             action = parsed.get("action", "")
 
-            # Basic quality checks
-            rating = 6.0  # Start with acceptable baseline
+            rating = 6.0
 
-            # Reasoning quality heuristics
             if len(reasoning) < 20:
-                rating -= 1.0  # Too brief
+                rating -= 1.0
             elif len(reasoning) > 500:
-                rating += 0.5  # Detailed reasoning
+                rating += 0.5
 
-            # Action validation
             if action in ["tool_call", "final_answer"]:
-                rating += 0.5  # Valid action
+                rating += 0.5
 
             if action == "tool_call":
                 tool_name = parsed.get("tool_name", "")
                 if tool_name in ["sam2", "dav2", "trellis"]:
-                    rating += 0.5  # Valid tool
+                    rating += 0.5
 
-            return min(max(rating, 1.0), 10.0)  # Clamp to 1-10 range
+            return min(max(rating, 1.0), 10.0)
 
         except (json.JSONDecodeError, KeyError):
-            return 5.0  # Neutral rating for unparseable content
+            return 5.0
 
     def _create_verification_messages(self,
                                     step_content: str,
@@ -230,10 +217,8 @@ class TraceVerifier:
                                     image_path: Optional[Path] = None) -> List[Dict[str, Any]]:
         """Create messages for step verification."""
 
-        # Get verifier system prompt
         system_prompt = prompt_manager.get_system_prompt("verifier")
 
-        # Build context information
         context_info = {
             "original_question": question,
             "step_index": step_index,
@@ -242,7 +227,6 @@ class TraceVerifier:
             "previous_context": self._extract_previous_context(full_trace, step_index)
         }
 
-        # Create user message with context
         user_content = [
             {
                 "type": "text",
@@ -261,7 +245,6 @@ Provide your verification assessment in the required JSON format."""
             }
         ]
 
-        # Add image if available
         if image_path and image_path.exists():
             base64_image = encode_image_to_base64(image_path)
             if base64_image:
@@ -269,7 +252,7 @@ Provide your verification assessment in the required JSON format."""
                     "type": "image_url",
                     "image_url": {
                         "url": base64_image,
-                        "detail": "low"  # Use low detail to save tokens
+                        "detail": "low"
                     }
                 })
 
@@ -293,7 +276,6 @@ Provide your verification assessment in the required JSON format."""
                 try:
                     parsed = json.loads(content)
 
-                    # Handle new format (reasoning + action)
                     if "reasoning" in parsed and "action" in parsed:
                         action = parsed.get("action", "unknown")
                         reasoning = parsed.get("reasoning", "")
@@ -307,7 +289,6 @@ Provide your verification assessment in the required JSON format."""
                             context_parts.append(f"Step {assistant_step_count}: [Reasoning] {reasoning}")
                             context_parts.append(f"Step {assistant_step_count}: [Final Answer] {answer}")
 
-                    # Handle old format for backward compatibility
                     else:
                         action = parsed.get("action", "unknown")
                         if action == "reasoning":
@@ -323,11 +304,10 @@ Provide your verification assessment in the required JSON format."""
                 except (json.JSONDecodeError, KeyError):
                     context_parts.append(f"Step {assistant_step_count}: [Unparseable] {content[:100]}")
             elif msg.get("role") == "user" and "Tool output:" in msg.get("content", ""):
-                # Add tool results context
                 tool_output = msg.get("content", "").replace("Tool output: ", "")
                 context_parts.append(f"Tool Result: {tool_output[:100]}")
 
-        return "\n".join(context_parts[-5:])  # Keep last 5 context items
+        return "\n".join(context_parts[-5:])
 
     def should_regenerate_step(self, verification_result: VerificationResult) -> bool:
         """
@@ -340,9 +320,7 @@ Provide your verification assessment in the required JSON format."""
         Returns:
             True if step should be regenerated
         """
-        # The decision is made entirely based on the numeric rating.
         if verification_result.rating < self.min_acceptable_rating:
-            # The log message was moved to verify_step for better context.
             return True
 
         return False

@@ -1,6 +1,4 @@
-"""
-Trace processor for analyzing and post-processing reasoning traces.
-"""
+
 import json
 import logging
 from pathlib import Path
@@ -43,18 +41,15 @@ class TraceProcessor:
             "errors": []
         }
 
-        # Analyze each message
         for i, message in enumerate(trace):
             role = message.get("role", "unknown")
             content = message.get("content", "")
 
             if role == "assistant":
-                # Try to parse assistant responses
                 try:
                     if isinstance(content, str) and content.strip():
                         parsed = json.loads(content)
 
-                        # Check for new format (reasoning + action)
                         if "reasoning" in parsed and "action" in parsed:
                             action = parsed.get("action")
                             reasoning = parsed.get("reasoning", "")
@@ -72,7 +67,6 @@ class TraceProcessor:
                                 analysis["final_answer"] = text
                                 analysis["success"] = True
 
-                            # All assistant messages now count as reasoning steps since they all have reasoning
                             analysis["reasoning_steps"].append({
                                 "step": analysis["step_count"],
                                 "text": reasoning,
@@ -80,7 +74,6 @@ class TraceProcessor:
                                 "message_index": i
                             })
 
-                        # Backward compatibility: Handle old format
                         else:
                             action = parsed.get("action")
                             if action == "tool_call":
@@ -110,12 +103,10 @@ class TraceProcessor:
                         "error": f"Failed to parse assistant response: {e}"
                     })
 
-        # Additional statistics
         analysis["tool_call_count"] = len(analysis["tool_calls"])
         analysis["reasoning_step_count"] = len(analysis["reasoning_steps"])
         analysis["error_count"] = len(analysis["errors"])
 
-        # Tool usage statistics
         if analysis["tool_calls"]:
             tool_usage = {}
             for tool_call in analysis["tool_calls"]:
@@ -123,7 +114,6 @@ class TraceProcessor:
                 tool_usage[tool] = tool_usage.get(tool, 0) + 1
             analysis["tool_usage"] = tool_usage
 
-        # Add verification analysis if available
         if verification_data:
             analysis["verification_summary"] = self._analyze_verification_data(verification_data)
 
@@ -169,7 +159,6 @@ class TraceProcessor:
                     if isinstance(content, str) and content.strip():
                         parsed = json.loads(content)
 
-                        # Handle both new and old formats
                         if parsed.get("action") == "final_answer":
                             return parsed.get("text")
                 except (json.JSONDecodeError, KeyError):
@@ -192,28 +181,24 @@ class TraceProcessor:
             issues.append("Trace is empty")
             return False, issues
 
-        # Check first message is system prompt
         if trace[0].get("role") != "system":
             issues.append("First message should be system prompt")
 
-        # Check for proper role alternation (after system message)
         expected_role = "user"
         for i, message in enumerate(trace[1:], 1):
             role = message.get("role")
-            if i == 1:  # First user message
+            if i == 1:
                 if role != "user":
                     issues.append(f"Message {i} should be user message (initial question)")
             elif role not in ["user", "assistant"]:
                 issues.append(f"Message {i} has invalid role: {role}")
 
-        # Check for required fields
         for i, message in enumerate(trace):
             if "role" not in message:
                 issues.append(f"Message {i} missing 'role' field")
             if "content" not in message:
                 issues.append(f"Message {i} missing 'content' field")
 
-        # Check assistant messages for valid JSON
         for i, message in enumerate(trace):
             if message.get("role") == "assistant":
                 content = message.get("content", "")
@@ -221,15 +206,12 @@ class TraceProcessor:
                     try:
                         parsed = json.loads(content)
 
-                        # Check for new format requirements
                         if "reasoning" in parsed and "action" in parsed:
-                            # New format validation
                             if not parsed.get("reasoning", "").strip():
                                 issues.append(f"Assistant message {i} has empty reasoning field")
                             if parsed.get("action") not in ["tool_call", "final_answer"]:
                                 issues.append(f"Assistant message {i} has invalid action")
                         elif "action" in parsed:
-                            # Old format - still supported for backward compatibility
                             pass
                         else:
                             issues.append(f"Assistant message {i} missing required fields")
@@ -261,13 +243,10 @@ class TraceProcessor:
             True if successful, False otherwise
         """
         try:
-            # Analyze the trace
             analysis = self.analyze_trace(trace, verification_data)
 
-            # Validate trace structure
             is_valid, issues = self.validate_trace_structure(trace)
 
-            # Prepare metadata
             metadata = {
                 "timestamp": datetime.now().isoformat(),
                 "analysis": analysis,
@@ -284,7 +263,6 @@ class TraceProcessor:
             if verification_data:
                 metadata["verification_data"] = verification_data
 
-            # Save the trace
             return save_reasoning_trace(trace, output_path, metadata)
 
         except Exception as e:
