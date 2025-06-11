@@ -123,7 +123,6 @@ class PromptManager:
             Message dictionary for tool results
         """
         if new_base64_image:
-            # Include both text and image
             return {
                 "role": "user",
                 "content": [
@@ -132,7 +131,7 @@ class PromptManager:
                         "type": "image_url",
                         "image_url": {
                             "url": new_base64_image,
-                            "detail": "low"  # Use low detail to save tokens
+                            "detail": "low"
                         }
                     }
                 ]
@@ -153,10 +152,7 @@ class PromptManager:
         Note:
             This method can be extended to support YAML, JSON, or other formats
         """
-        # Implementation depends on desired file format
-        # For now, this is a placeholder for future enhancement
         logger.info(f"Loading prompts from {file_path} (not yet implemented)")
 
 
-# Global prompt manager instance
 prompt_manager = PromptManager()

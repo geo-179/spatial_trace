@@ -38,11 +38,9 @@ class SAM2Tool(BaseTool):
         """
         logger.info(f"Running SAM2 segmentation on {image_path}")
 
-        # Ensure paths are absolute for robust execution
         absolute_image_path = image_path.resolve()
         script_path = (self.tool_path / self.script_name).resolve()
 
-        # Prepare the command with absolute paths
         command = [
             "conda", "run", "-n", self.conda_env,
             "python", str(script_path),
@@ -53,7 +51,6 @@ class SAM2Tool(BaseTool):
         logger.debug(f"Working directory: {self.tool_path}")
 
         try:
-            # Execute the command
             result = subprocess.run(
                 command,
                 check=True,
@@ -63,7 +60,6 @@ class SAM2Tool(BaseTool):
             )
             logger.debug(f"SAM2 stdout: {result.stdout}")
 
-            # Check for output file
             output_file_path = self.tool_path / self.output_filename
 
             if output_file_path.is_file():

@@ -48,7 +48,6 @@ class ToolRegistry:
         - DAV2_ENV: Conda environment name for DAV2 (default: DAv2)
         - TRELLIS_ENV: Conda environment name for Trellis (default: trellis)
         """
-        # Configure SAM2
         sam2_path = os.getenv("SAM2_PATH")
         if sam2_path:
             sam2_env = os.getenv("SAM2_ENV", "sam2")
@@ -60,7 +59,6 @@ class ToolRegistry:
         else:
             logger.warning("SAM2_PATH not set in environment variables")
 
-        # Configure DAV2
         dav2_path = os.getenv("DAV2_PATH")
         if dav2_path:
             dav2_env = os.getenv("DAV2_ENV", "DAv2")
@@ -72,7 +70,6 @@ class ToolRegistry:
         else:
             logger.warning("DAV2_PATH not set in environment variables")
 
-        # Configure Trellis
         trellis_path = os.getenv("TRELLIS_PATH")
         if trellis_path:
             trellis_env = os.getenv("TRELLIS_ENV", "trellis")
@@ -194,5 +191,4 @@ class ToolRegistry:
         return availability
 
 
-# Global tool registry instance
 tool_registry = ToolRegistry()

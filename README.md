@@ -1,4 +1,4 @@
-# Spatial Trace
+# SpatialTraceGen: A Framework for Generating Multi-Hop Spatial Reasoning Traces with LLMs
 
 A comprehensive framework for generating spatial reasoning traces using Large Language Models (LLMs) and computer vision tools. This system enables step-by-step spatial reasoning with integrated verification, experiment management, and detailed analysis capabilities.
 

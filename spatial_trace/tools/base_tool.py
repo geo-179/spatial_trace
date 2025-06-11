@@ -1,6 +1,3 @@
-"""
-Abstract base class for spatial reasoning tools.
-"""
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Tuple, Optional, Dict, Any
@@ -58,12 +55,10 @@ class BaseTool(ABC):
             True if tool can be used, False otherwise
         """
         try:
-            # Check if tool directory exists
             if not self.tool_path.exists():
                 logger.warning(f"Tool path does not exist: {self.tool_path}")
                 return False
 
-            # Additional checks can be implemented by subclasses
             return self._check_availability()
         except Exception as e:
             logger.error(f"Error checking tool availability: {e}")

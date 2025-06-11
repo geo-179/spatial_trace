@@ -35,10 +35,8 @@ class OutputParser:
             return False, None, "Empty response from LLM"
 
         try:
-            # Parse JSON
             data = json.loads(response_text.strip())
 
-            # Validate structure
             is_valid, error = OutputParser._validate_response_structure(data)
             if not is_valid:
                 return False, None, error
@@ -65,38 +63,31 @@ class OutputParser:
         Returns:
             Tuple of (is_valid, error_message)
         """
-        # Check if required fields exist
         if "reasoning" not in data:
             return False, "Missing 'reasoning' field in response"
 
         if "action" not in data:
             return False, "Missing 'action' field in response"
 
-        # Check reasoning is not empty
         if not data["reasoning"] or not data["reasoning"].strip():
             return False, "Empty 'reasoning' field in response"
 
         action = data["action"]
 
-        # Validate action type
         try:
             action_type = ActionType(action)
         except ValueError:
             valid_actions = [t.value for t in ActionType]
             return False, f"Invalid action '{action}'. Valid actions: {valid_actions}"
 
-        # Validate required fields for each action type
         if action_type == ActionType.TOOL_CALL:
             if "tool_name" not in data:
                 return False, "Missing 'tool_name' field for tool_call action"
 
-            # Validate tool name
             tool_name = data["tool_name"]
-            # Import here to avoid circular imports
             from ..tools import tool_registry
             valid_tools = tool_registry.list_tools()
             if not valid_tools:
-                # Fallback to default tools if registry is empty
                 valid_tools = ["sam2", "dav2", "trellis"]
             if tool_name not in valid_tools:
                 return False, f"Invalid tool '{tool_name}'. Valid tools: {valid_tools}"
@@ -105,7 +96,6 @@ class OutputParser:
             if "text" not in data:
                 return False, f"Missing 'text' field for final_answer action"
 
-            # Check that text is not empty
             if not data["text"] or not data["text"].strip():
                 return False, f"Empty 'text' field for final_answer action"
 
@@ -124,7 +114,6 @@ class OutputParser:
         """
         action_type = ActionType(parsed_data["action"])
 
-        # Always include reasoning
         action_info = {
             "reasoning": parsed_data["reasoning"]
         }
