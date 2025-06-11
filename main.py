@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-"""
-Example usage of the spatial_trace package.
-
-This script demonstrates how to use the refactored spatial reasoning pipeline
-to process CLEVR dataset questions with spatial reasoning traces.
-"""
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -14,17 +6,13 @@ from spatial_trace.utils import read_csv_data
 from spatial_trace.tools import tool_registry
 from spatial_trace import SpatialReasoningPipeline, TraceProcessor
 
-# First terminal: verify = false
-# Second terminal: verify = true
-
 class Arguments(Tap):
     """Command line arguments for the spatial trace demo."""
-    max_steps: int = 10  # Maximum number of reasoning steps
-    # question_idx: int = 1  # Index of question to process from dataset
+    max_steps: int = 10
     verify: bool = True
-    number_questions: int = 100 # Number of questions to process from dataset
-    data_dir: str = "data/clevr_human_subset"  # Path to data directory
-    output_file: str = "example_trace.json"  # Output file for trace results
+    number_questions: int = 100
+    data_dir: str = "data/clevr_human_subset"
+    output_file: str = "example_trace.json"
 
 def setup_environment():
     """Set up environment variables for tools (if not already set)."""

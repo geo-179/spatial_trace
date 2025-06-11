@@ -40,14 +40,12 @@ Examples:
     
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
     
-    # Reason command
     reason_parser = subparsers.add_parser("reason", help="Run spatial reasoning on a single question")
     reason_parser.add_argument("--question", required=True, help="Spatial reasoning question")
     reason_parser.add_argument("--image", required=True, type=Path, help="Path to input image")
     reason_parser.add_argument("--output", type=Path, help="Path to save reasoning trace (optional)")
     reason_parser.add_argument("--max-steps", type=int, default=10, help="Maximum reasoning steps")
     
-    # Batch command
     batch_parser = subparsers.add_parser("batch", help="Process a dataset of questions")
     batch_parser.add_argument("--input", required=True, type=Path, help="Path to CSV dataset")
     batch_parser.add_argument("--output-dir", required=True, type=Path, help="Directory to save results")
@@ -56,7 +54,6 @@ Examples:
     batch_parser.add_argument("--image-column", default="image_path", help="Name of image path column in CSV")
     batch_parser.add_argument("--limit", type=int, help="Limit number of samples to process")
     
-    # Status command
     status_parser = subparsers.add_parser("status", help="Check system status")
     
     return parser
@@ -68,27 +65,22 @@ def run_single_reasoning(args) -> int:
         logger.info(f"Running spatial reasoning on: {args.question}")
         logger.info(f"Image: {args.image}")
         
-        # Initialize pipeline
         pipeline = SpatialReasoningPipeline(max_steps=args.max_steps)
         
-        # Check system status
         status = pipeline.check_system_status()
         if not status["llm_available"]:
             logger.error("LLM client is not available. Please check your configuration.")
             return 1
         
-        # Generate reasoning trace
         trace = pipeline.generate_reasoning_trace(args.question, args.image)
         
         if not trace:
             logger.error("Failed to generate reasoning trace")
             return 1
         
-        # Process the trace
         processor = TraceProcessor()
         final_answer = processor.extract_final_answer(trace)
         
-        # Print results
         print("\n" + "="*50)
         print("SPATIAL REASONING RESULT")
         print("="*50)
@@ -97,7 +89,6 @@ def run_single_reasoning(args) -> int:
         print(f"Final Answer: {final_answer or 'No answer reached'}")
         print("="*50)
         
-        # Save trace if output path provided
         if args.output:
             success = processor.save_trace_with_analysis(
                 trace, args.output, args.question, args.image
@@ -108,7 +99,6 @@ def run_single_reasoning(args) -> int:
                 logger.error(f"Failed to save trace to: {args.output}")
                 return 1
         
-        # Print trace summary
         summary = processor.create_trace_summary(trace)
         print(f"\n{summary}")
         
@@ -125,13 +115,11 @@ def run_batch_processing(args) -> int:
         logger.info(f"Processing dataset: {args.input}")
         logger.info(f"Output directory: {args.output_dir}")
         
-        # Load dataset
         df = read_csv_data(args.input)
         if df is None:
             logger.error(f"Failed to load dataset from {args.input}")
             return 1
         
-        # Validate columns
         if args.question_column not in df.columns:
             logger.error(f"Question column '{args.question_column}' not found in dataset")
             return 1
@@ -140,25 +128,20 @@ def run_batch_processing(args) -> int:
             logger.error(f"Image column '{args.image_column}' not found in dataset")
             return 1
         
-        # Apply limit if specified
         if args.limit:
             df = df.head(args.limit)
             logger.info(f"Limited dataset to {len(df)} samples")
         
-        # Create output directory
         args.output_dir.mkdir(parents=True, exist_ok=True)
         
-        # Initialize pipeline and processor
         pipeline = SpatialReasoningPipeline(max_steps=args.max_steps)
         processor = TraceProcessor()
         
-        # Check system status
         status = pipeline.check_system_status()
         if not status["llm_available"]:
             logger.error("LLM client is not available. Please check your configuration.")
             return 1
         
-        # Process each sample
         results = []
         successful = 0
         
@@ -169,14 +152,11 @@ def run_batch_processing(args) -> int:
                 
                 logger.info(f"Processing sample {idx + 1}/{len(df)}: {question[:50]}...")
                 
-                # Generate trace
                 trace = pipeline.generate_reasoning_trace(question, image_path)
                 
                 if trace:
-                    # Extract final answer
                     final_answer = processor.extract_final_answer(trace)
                     
-                    # Save trace
                     output_file = args.output_dir / f"trace_{idx:04d}.json"
                     processor.save_trace_with_analysis(trace, output_file, question, image_path)
                     
@@ -211,7 +191,6 @@ def run_batch_processing(args) -> int:
                     "error": str(e)
                 })
         
-        # Save results summary
         summary_file = args.output_dir / "batch_results.json"
         with open(summary_file, 'w') as f:
             json.dump({
@@ -242,12 +221,10 @@ def check_system_status(args) -> int:
         print("SPATIAL TRACE SYSTEM STATUS")
         print("="*50)
         
-        # LLM status
         print(f"LLM Available: {'✓' if status['llm_available'] else '✗'}")
         print(f"LLM Model: {status['llm_info']['model_name']}")
         print(f"LLM Provider: {status['llm_info'].get('provider', 'Unknown')}")
         
-        # Tools status
         print(f"\nAvailable Tools: {len(status['available_tools'])}")
         for tool in status['available_tools']:
             tool_available = status['tool_availability'].get(tool, False)
@@ -268,10 +245,8 @@ def main() -> int:
     parser = setup_argument_parser()
     args = parser.parse_args()
     
-    # Set log level
     set_log_level(args.log_level)
     
-    # Execute command
     if args.command == "reason":
         return run_single_reasoning(args)
     elif args.command == "batch":

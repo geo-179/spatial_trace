@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-
-"""
-Simple GPT-4o baseline for spatial reasoning on CLEVR dataset.
-
-This script makes a single API call to GPT-4o without tool use
-to serve as a baseline for comparison with the spatial reasoning pipeline.
-"""
-
 import os
 import base64
 from pathlib import Path
@@ -19,9 +10,9 @@ import json
 
 class Arguments(Tap):
     """Command line arguments for the baseline."""
-    number_questions: int = 20  # Number of questions to process from dataset
-    data_dir: str = "data/clevr_human_subset"  # Path to data directory
-    output_file: str = "baseline_results.json"  # Output file for results
+    number_questions: int = 20
+    data_dir: str = "data/clevr_human_subset"
+    output_file: str = "baseline_results.json"
 
 
 def setup_environment():
@@ -69,13 +60,10 @@ def create_baseline_prompt():
 def call_gpt4o(client, question, image_path, system_prompt):
     """Make a single API call to GPT-4o."""
     try:
-        # Encode the image
         base64_image = f"data:image/jpeg;base64,{encode_image(image_path)}"
         
-        # Create the system prompt
         system_prompt = create_baseline_prompt()
         
-        # Make the API call
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -113,7 +101,6 @@ def extract_final_answer(response_text):
     if not response_text:
         return None
     
-    # Look for "Final answer:" pattern (case insensitive)
     text_lower = response_text.lower()
     
     if "final answer:" in text_lower:
@@ -130,7 +117,6 @@ def extract_final_answer(response_text):
     elif 'no' in text_lower and 'yes' not in text_lower:
         return 'no'
     
-    # Look for numbers (simple heuristic)
     words = response_text.split()
     for word in reversed(words):
         if word.isdigit():
@@ -146,14 +132,11 @@ def main():
     print("\nGPT-4o Baseline for Spatial Reasoning")
     print("=" * 40)
     
-    # Setup environment
     if not setup_environment():
         return
     
-    # Initialize OpenAI client
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     
-    # Load dataset
     script_dir = Path(__file__).resolve().parent
     csv_file_path = script_dir / args.data_dir / "subset.csv"
     
@@ -165,7 +148,6 @@ def main():
     clevr_data = pd.read_csv(csv_file_path)
     print(f"• Loaded {len(clevr_data)} samples")
     
-    # Process questions
     results = []
     correct = 0
     total = 0
@@ -186,7 +168,6 @@ def main():
             print(f"ERROR: Image not found at {image_path}")
             continue
         
-        # Call GPT-4o
         print("• Calling GPT-4o...")
         system_prompt = create_baseline_prompt()
         response = call_gpt4o(client, question, image_path, system_prompt)
@@ -195,13 +176,11 @@ def main():
             print("ERROR: Failed to get response from GPT-4o")
             continue
         
-        # Extract answer
         predicted_answer = extract_final_answer(response)
         
         print(f"• GPT-4o Response:\n{response}")
         print(f"• Extracted Answer: {predicted_answer}")
         
-        # Check correctness
         is_correct = predicted_answer == expected_answer
         if is_correct:
             correct += 1
@@ -209,7 +188,6 @@ def main():
         
         print(f"• Correct: {'✓' if is_correct else '✗'}")
         
-        # Store results
         result = {
             "question_idx": question_idx,
             "question": question,
@@ -221,7 +199,6 @@ def main():
         }
         results.append(result)
     
-    # Save results
     output_path = script_dir / args.output_file
     with open(output_path, 'w') as f:
         json.dump({
@@ -233,7 +210,6 @@ def main():
     
     print(f"\nResults saved to: {output_path}")
     
-    # Print summary
     print(f"\nFinal Results:")
     print(f"• Total Questions: {total}")
     print(f"• Correct Answers: {correct}")

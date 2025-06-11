@@ -1,15 +1,3 @@
-#!/usr/bin/env python3
-"""
-Tool Call Distribution Analysis Script
-
-This script analyzes the distribution of tool calls used by an LLM when reasoning through CLEVR problems.
-It processes all question subfolders, extracts tool calls from complete_trace.json files,
-and generates a comprehensive analysis with visualizations.
-
-Author: Assistant
-Date: 2024
-"""
-
 import os
 import json
 import matplotlib.pyplot as plt
@@ -70,14 +58,11 @@ def extract_tool_calls_from_trace(trace_data):
     
     for message in trace_array:
         if isinstance(message, dict) and message.get('role') == 'assistant':
-            # The content field contains a JSON string that needs to be parsed
             content = message.get('content')
             if content and isinstance(content, str):
                 try:
-                    # Parse the JSON content
                     content_data = json.loads(content)
                     
-                    # Check if this is a tool call
                     if (isinstance(content_data, dict) and 
                         content_data.get('action') == 'tool_call'):
                         
@@ -86,10 +71,8 @@ def extract_tool_calls_from_trace(trace_data):
                             tool_calls.append(tool_name.strip())
                             
                 except json.JSONDecodeError:
-                    # Skip messages with malformed JSON content
                     continue
                 except Exception:
-                    # Skip any other parsing errors
                     continue
     
     return tool_calls
@@ -110,7 +93,6 @@ def process_question_folder(folder_path):
         return [], f"Trace file not found: {trace_file}"
     
     try:
-        # Handle large files by reading with proper encoding
         with open(trace_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
@@ -137,20 +119,16 @@ def create_visualization(tool_counter, output_dir):
         print("No data to visualize")
         return None
     
-    # Set seaborn style for academic publications
     sns.set_style("whitegrid")
     sns.set_context("paper", font_scale=1.4)
     
-    # Define consistent color mapping for each tool
     tool_color_map = {
         'TRELLIS': '#1f77b4',  # Blue
         'SAM 2': '#ff7f0e',    # Orange  
         'DAv2': '#2ca02c'      # Green
     }
     
-    # Prepare data for plotting
     tools = list(tool_counter.keys())
-    # Format tool names properly
     formatted_tools = []
     for tool in tools:
         if tool.lower() == 'trellis':
@@ -165,28 +143,22 @@ def create_visualization(tool_counter, output_dir):
     counts = list(tool_counter.values())
     total_calls = sum(counts)
     
-    # Create figure with appropriate size for academic papers
     fig, ax = plt.subplots(figsize=(10, 6))
     
-    # Assign consistent colors based on tool names
     colors = [tool_color_map.get(tool, '#808080') for tool in tools]
     
-    # Create bar chart with seaborn styling
     bars = ax.bar(tools, counts, 
                   color=colors,
                   edgecolor='white',
                   linewidth=0.8,
                   alpha=0.85)
     
-    # Customize the plot with academic styling (no title)
     ax.set_xlabel('Tool Name', fontsize=18)
     ax.set_ylabel('Number of Calls', fontsize=18)
     
-    # Improve x-axis labels - make tool names larger
     ax.tick_params(axis='x', labelsize=16)
     ax.tick_params(axis='y', labelsize=11)
     
-    # Add value labels on top of bars with percentages
     for i, bar in enumerate(bars):
         height = bar.get_height()
         percentage = (height / total_calls) * 100
@@ -196,31 +168,24 @@ def create_visualization(tool_counter, output_dir):
                 fontsize=14, fontweight='bold',
                 color='black')
     
-    # Customize grid for academic style - horizontal dotted lines only
-    ax.grid(True)  # Turn on grid first
-    ax.grid(axis='x', visible=False)  # Explicitly turn off vertical grid lines
-    ax.grid(axis='y', alpha=0.7, linestyle=':', linewidth=0.8)  # Darker dotted horizontal lines
+    ax.grid(True)
+    ax.grid(axis='x', visible=False)
+    ax.grid(axis='y', alpha=0.7, linestyle=':', linewidth=0.8)
     ax.set_axisbelow(True)
     
-    # Set y-axis to start from 0 and add some padding at top
     ax.set_ylim(0, max(counts) * 1.15)
     
-    # Remove top and right spines for cleaner look
     sns.despine(top=True, right=True)
     
-    # Add subtle background color
     ax.set_facecolor('#fafafa')
     
-    # Adjust layout
     plt.tight_layout()
     
-    # Save with high quality for publications
     histogram_path = os.path.join(output_dir, "tool_call_distribution_histogram.png")
     plt.savefig(histogram_path, dpi=300, bbox_inches='tight', 
                 facecolor='white', edgecolor='none',
                 format='png')
     
-    # Also save as PDF for academic use
     pdf_path = os.path.join(output_dir, "tool_call_distribution_histogram.pdf")
     plt.savefig(pdf_path, bbox_inches='tight', 
                 facecolor='white', edgecolor='none',
@@ -229,10 +194,8 @@ def create_visualization(tool_counter, output_dir):
     print(f"Histogram saved to: {histogram_path}")
     print(f"PDF version saved to: {pdf_path}")
     
-    # Show the plot
     plt.show()
     
-    # Reset style to default
     sns.reset_defaults()
     
     return histogram_path
@@ -253,20 +216,16 @@ def create_donut_chart(tool_counter, output_dir, center_text="Strict Verificatio
         print("No data to visualize")
         return None
     
-    # Set seaborn style for academic publications
     sns.set_style("white")
     sns.set_context("paper", font_scale=1.4)
     
-    # Define consistent color mapping for each tool
     tool_color_map = {
-        'TRELLIS': '#5ec962',  # Blue
+        'TRELLIS': '#5ec962',  
         'SAM 2': '#3b528b',   
-        'DAv2': '#21918c'      # Green
+        'DAv2': '#21918c'      
     }
     
-    # Prepare data for plotting
     tools = list(tool_counter.keys())
-    # Format tool names properly
     formatted_tools = []
     for tool in tools:
         if tool.lower() == 'trellis':
@@ -281,49 +240,38 @@ def create_donut_chart(tool_counter, output_dir, center_text="Strict Verificatio
     counts = list(tool_counter.values())
     total_calls = sum(counts)
     
-    # Calculate percentages
     percentages = [(count / total_calls) * 100 for count in counts]
     
-    # Create figure with appropriate size for academic papers
     fig, ax = plt.subplots(figsize=(8, 8))
     
-    # Assign consistent colors based on tool names
     colors = [tool_color_map.get(tool, '#808080') for tool in tools]
     
-    # Create donut chart (pie chart with a hole)
     wedges, texts, autotexts = ax.pie(counts, labels=tools, autopct='%1.1f%%',
                                       colors=colors, startangle=90,
                                       pctdistance=0.75, labeldistance=1.1,
                                       textprops={'fontsize': 16, 'fontweight': 'bold'})
     
-    # Create the donut hole
     centre_circle = plt.Circle((0, 0), 0.50, fc='white')
     fig.gca().add_artist(centre_circle)
     
-    # Customize the text
     for autotext in autotexts:
         autotext.set_color('white')
         autotext.set_fontsize(18)
         autotext.set_fontweight('bold')
     
-    # Add title in the center
     ax.text(0, 0, center_text, 
             horizontalalignment='center', verticalalignment='center',
             fontsize=20, fontweight='bold', color='black')
     
-    # Ensure the pie chart is circular
     ax.axis('equal')
     
-    # Adjust layout
     plt.tight_layout()
     
-    # Save with high quality for publications
     donut_path = os.path.join(output_dir, "tool_call_distribution_donut.png")
     plt.savefig(donut_path, dpi=300, bbox_inches='tight', 
                 facecolor='white', edgecolor='none',
                 format='png')
     
-    # Also save as PDF for academic use
     pdf_path = os.path.join(output_dir, "tool_call_distribution_donut.pdf")
     plt.savefig(pdf_path, bbox_inches='tight', 
                 facecolor='white', edgecolor='none',
@@ -332,10 +280,8 @@ def create_donut_chart(tool_counter, output_dir, center_text="Strict Verificatio
     print(f"Donut chart saved to: {donut_path}")
     print(f"PDF version saved to: {pdf_path}")
     
-    # Show the plot
     plt.show()
     
-    # Reset style to default
     sns.reset_defaults()
     
     return donut_path
@@ -352,11 +298,9 @@ def save_detailed_results(tool_counter, processing_stats, output_dir):
     Returns:
         str: Path to saved results file
     """
-    # Calculate additional statistics
     total_calls = sum(tool_counter.values())
     unique_tools = len(tool_counter)
     
-    # Create comprehensive results dictionary
     results_data = {
         "analysis_summary": {
             "total_tool_calls": total_calls,
@@ -377,7 +321,6 @@ def save_detailed_results(tool_counter, processing_stats, output_dir):
         }
     }
     
-    # Save to JSON file
     results_path = os.path.join(output_dir, "tool_call_analysis_results.json")
     with open(results_path, 'w', encoding='utf-8') as f:
         json.dump(results_data, f, indent=2, sort_keys=True, ensure_ascii=False)
@@ -397,7 +340,6 @@ def print_analysis_summary(tool_counter, processing_stats):
     print("TOOL CALL DISTRIBUTION ANALYSIS SUMMARY")
     print("="*60)
     
-    # Processing statistics
     print(f"\nProcessing Statistics:")
     print(f"  • Total question folders found: {processing_stats['total_folders']}")
     print(f"  • Successfully processed files: {processing_stats['processed_files']}")
@@ -428,7 +370,6 @@ def analyze_tool_calls():
     extracts tool calls from complete_trace.json files, and generates comprehensive
     analysis with visualizations and detailed statistics.
     """
-    # Configuration
     questions_dir = "/home/rmc/spatial_trace/spatial_trace/spatial_trace/evaluation/experiments/clevr_human_WITH_hard_verification_large/questions"
     output_dir = "/home/rmc/spatial_trace/spatial_trace/spatial_trace/"
     
@@ -436,16 +377,13 @@ def analyze_tool_calls():
     print(f"Questions directory: {questions_dir}")
     print(f"Output directory: {output_dir}")
     
-    # Validate directories
     if not validate_directories(questions_dir, output_dir):
         print("Directory validation failed. Exiting.")
         return
     
-    # Initialize data structures
     tool_counter = Counter()
     error_log = []
     
-    # Find all question folders
     question_pattern = os.path.join(questions_dir, "q*")
     question_folders = sorted(glob.glob(question_pattern))
     
@@ -455,10 +393,9 @@ def analyze_tool_calls():
     
     print(f"Found {len(question_folders)} question folders to process")
     
-    # Process each question folder
     processed_files = 0
     error_files = 0
-    trellis_folders = []  # Track folders where TRELLIS is called
+    trellis_folders = []
     
     for folder in tqdm(question_folders, desc="Processing question folders", unit="folder"):
         folder_name = os.path.basename(folder)
@@ -469,19 +406,15 @@ def analyze_tool_calls():
             error_log.append(f"{folder_name}: {error}")
         else:
             processed_files += 1
-            # Add tool calls to counter
             folder_has_trellis = False
             for tool in tool_calls:
                 tool_counter[tool] += 1
-                # Check if TRELLIS is called in this folder
                 if tool.lower() == 'trellis':
                     folder_has_trellis = True
             
-            # Track folders with TRELLIS calls
             if folder_has_trellis:
                 trellis_folders.append(folder_name)
     
-    # Calculate processing statistics
     total_folders = len(question_folders)
     success_rate = (processed_files / total_folders) * 100 if total_folders > 0 else 0
     
@@ -492,10 +425,8 @@ def analyze_tool_calls():
         "success_rate": success_rate
     }
     
-    # Print summary
     print_analysis_summary(tool_counter, processing_stats)
     
-    # Print TRELLIS directories
     if trellis_folders:
         print(f"\n" + "="*60)
         print("DIRECTORIES WHERE TRELLIS IS CALLED")
@@ -507,7 +438,6 @@ def analyze_tool_calls():
     else:
         print(f"\nNo directories with TRELLIS calls found.")
     
-    # Save error log if there were errors
     if error_log:
         error_log_path = os.path.join(output_dir, "tool_call_analysis_errors.log")
         with open(error_log_path, 'w', encoding='utf-8') as f:
@@ -517,13 +447,10 @@ def analyze_tool_calls():
                 f.write(f"{error}\n")
         print(f"Error log saved to: {error_log_path}")
     
-    # Generate outputs if we found tool calls
     if tool_counter:
-        # Create visualizations
         histogram_path = create_visualization(tool_counter, output_dir)
         donut_path = create_donut_chart(tool_counter, output_dir, center_text=r"$\tau = 5$")
         
-        # Save detailed results
         results_path = save_detailed_results(tool_counter, processing_stats, output_dir)
         
         print(f"\nAnalysis completed successfully!")
