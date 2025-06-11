@@ -2,7 +2,7 @@
 
 A comprehensive framework for generating spatial reasoning traces using Large Language Models (LLMs) and computer vision tools. This system enables step-by-step spatial reasoning with integrated verification, experiment management, and detailed analysis capabilities.
 
-![Alt Text](assets/SpatialTrace_Pipeline)
+![Alt Text](assets/SpatialTrace_Pipeline.png)
 
 ## Overview
 

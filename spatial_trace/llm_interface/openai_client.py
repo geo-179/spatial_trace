@@ -9,13 +9,11 @@ from pathlib import Path
 from openai import OpenAI
 from .base_client import BaseLLMClient
 
-# Try to load .env file if python-dotenv is available
 try:
     from dotenv import load_dotenv
-    # Look for .env file in current directory and parent directories
     load_dotenv()
 except ImportError:
-    pass  # python-dotenv not installed, skip auto-loading
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +31,6 @@ class OpenAIClient(BaseLLMClient):
         """
         super().__init__(model_name)
         
-        # Get API key from parameter or environment
         if api_key:
             self.api_key = api_key
         else:
@@ -77,7 +74,6 @@ class OpenAIClient(BaseLLMClient):
             raise RuntimeError("OpenAI client is not available")
         
         try:
-            # Prepare API call parameters
             api_params = {
                 "model": self.model_name,
                 "messages": messages,
@@ -90,11 +86,9 @@ class OpenAIClient(BaseLLMClient):
             if response_format is not None:
                 api_params["response_format"] = response_format
             
-            # Make API call
             response = self.client.chat.completions.create(**api_params)
             
-            # Extract response text
-            response_text = response.choices[0].message.content
+            response
             logger.debug(f"OpenAI API call successful. Response length: {len(response_text) if response_text else 0}")
             
             return response_text
