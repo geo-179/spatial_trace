@@ -17,18 +17,18 @@ Spatial Trace provides a complete pipeline for spatial reasoning research:
 
 ## Key Features
 
-### 🧠 Spatial Reasoning Pipeline
+### Spatial Reasoning Pipeline
 - **Multi-Tool Integration**: SAM2 (segmentation), DAV2 (depth estimation), TRELLIS (3D generation)
 - **LLM Interface**: Structured communication with OpenAI's GPT models
 - **Reasoning Traces**: Generation of interpretable step-by-step spatial reasoning processes
 - **Verification System**: Configurable verification levels (τ = 4, τ = 5) for quality control
 
-### 📊 Evaluation & Analysis
+### Evaluation & Analysis
 - **Automated Evaluation**: Process large datasets with accuracy tracking
 - **Tool Usage Analysis**: Comprehensive analysis of which tools are used when and where
 - **Quality Assessment**: Automated grading and quality metrics
 
-### 🔧 Development & Research
+### Development & Research
 - **Modular Architecture**: Clean separation of concerns across components
 - **Extensible Design**: Easy to add new tools and reasoning capabilities
 - **CLI Interface**: Command-line tools for batch processing and analysis

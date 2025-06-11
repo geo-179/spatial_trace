@@ -61,7 +61,6 @@ def save_json_data(data: Dict[Any, Any], file_path: Path, indent: int = 2) -> bo
     try:
         file_path = Path(file_path)
         
-        # Create directory if it doesn't exist
         file_path.parent.mkdir(parents=True, exist_ok=True)
         
         with open(file_path, 'w', encoding='utf-8') as f:
@@ -119,7 +118,6 @@ def save_reasoning_trace(trace: List[Dict[str, Any]], output_path: Path, metadat
         True if successful, False otherwise
     """
     try:
-        # Prepare the output data
         output_data = {
             "metadata": metadata or {},
             "trace": trace,
