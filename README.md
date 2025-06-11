@@ -32,7 +32,6 @@ Spatial Trace provides a complete pipeline for spatial reasoning research:
 - **Modular Architecture**: Clean separation of concerns across components
 - **Extensible Design**: Easy to add new tools and reasoning capabilities
 - **CLI Interface**: Command-line tools for batch processing and analysis
-- **Jupyter Integration**: Notebook support for interactive analysis
 
 ## Setup and Installation
 

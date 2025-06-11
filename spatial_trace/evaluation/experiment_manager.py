@@ -1,6 +1,3 @@
-"""
-Utilities for managing experiment organization and structure.
-"""
 import json
 import shutil
 from pathlib import Path
