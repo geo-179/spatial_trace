@@ -150,15 +150,15 @@ def export_subset(data_dir: str,
                         for size in ['large', 'small', 'big', 'tiny', 'size']))
 
     print(f"\n✔ {len(rows)} CLEVR-Humans questions exported to {out_dir}")
-    print(f"  📊 Answer Distribution:")
+    print(f"   Answer Distribution:")
     print(f"    • Yes/No questions: {yes_no_count}")
     print(f"    • Counting questions: {counting_count}")
     print(f"    • Other questions: {other_count}")
-    print(f"  🎯 Question Topics:")
+    print(f"   Question Topics:")
     print(f"    • Color-related: {color_questions}")
     print(f"    • Shape-related: {shape_questions}")
     print(f"    • Size-related: {size_questions}")
-    print(f"  📁 Files:")
+    print(f"   Files:")
     print(f"    • CSV: {csv_path.name}")
     print(f"    • Images: {img_dst_root.relative_to(out_dir)}/*")
 

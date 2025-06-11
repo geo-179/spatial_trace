@@ -1,11 +1,15 @@
-"""
-Grade reasoning traces on multiple dimensions.
-"""
 import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 import logging
+import argparse
+import sys
+import copy
+import time
+
+sys.path.append(str(Path(__file__).parent.parent))
+from spatial_trace.llm_interface.openai_client import OpenAIClient
 
 logger = logging.getLogger(__name__)
 
@@ -21,264 +25,186 @@ class TraceGrade:
     efficiency: float  # How efficiently was the problem solved?
     feedback: str
 
-
 class TraceGrader:
-    """Simple but comprehensive trace grading system."""
+    """
+    Uses an LLM to grade reasoning traces based on quality and diversity criteria.
+    """
 
     def __init__(self):
-        self.weights = {
-            "reasoning_quality": 0.3,
-            "tool_usage": 0.2,
-            "correctness": 0.4,  # Most important
-            "efficiency": 0.1
-        }
+        """Initializes the grader with an LLM client and a system prompt."""
+        self.llm_client = OpenAIClient()
+        self.system_prompt = self._get_system_prompt()
+        self.image_keys = {'image_base64', 'image', 'mask', 'masked_image', 'depth_map'}
 
-    def grade_trace(self,
-                   trace_data: Dict[str, Any],
-                   ground_truth: str = None) -> TraceGrade:
+    def _get_system_prompt(self) -> str:
+        """Defines the critical instructions for the LLM judge."""
+        return """
+You are an expert evaluator of AI-generated reasoning traces. Your task is to determine if a given reasoning trace is a "beneficial" example for a dataset focused on complex spatial reasoning processes.
+
+Your evaluation should focus ONLY on two criteria:
+1.  **Solid Reasoning:** Is the AI's reasoning clear, logical, and not repetitive? Does it show a chain of thought that builds upon previous steps and tool outputs?
+2.  **Good, Diverse Tool Calls:** Does the AI use a logical sequence of different tools (e.g., segmentation, then depth, then 3D reconstruction) where appropriate? Using just one tool is only acceptable if the question is extremely simple. Repetitive, unnecessary tool use is bad.
+
+**IMPORTANT: IGNORE THE FINAL ANSWER.** The correctness of the final answer is NOT part of your evaluation. A trace is "beneficial" if the reasoning process is sound and the tool use is logical, even if the final answer is wrong.
+
+You will be given the question and the full reasoning trace. All image data has been removed.
+
+Based on the criteria above, is this trace a beneficial addition to a high-quality dataset?
+
+Respond with ONLY the word "yes" or the word "no". Do not provide any other text or explanation.
+"""
+
+    def _censor_images_in_trace(self, data: Any) -> Any:
         """
-        Grade a single trace comprehensively.
-
-        Args:
-            trace_data: Full trace data including trace and metadata
-            ground_truth: Correct answer (optional)
-
-        Returns:
-            Grade with scores and feedback
+        Recursively finds and removes image data in a trace, replacing it with a placeholder string.
+        This is critical to avoid hitting token limits. It now correctly handles JSON data
+        prefixed with 'Tool output: '.
         """
-        trace_id = trace_data.get("id", "unknown")
-        trace = trace_data.get("trace", [])
-
-        # Extract key information
-        reasoning_steps = self._extract_reasoning_steps(trace)
-        tool_calls = self._extract_tool_calls(trace)
-        final_answer = self._extract_final_answer(trace)
-
-        # Grade each dimension
-        reasoning_score = self._grade_reasoning_quality(reasoning_steps)
-        tool_score = self._grade_tool_usage(tool_calls, reasoning_steps)
-        correctness_score = self._grade_correctness(final_answer, ground_truth)
-        efficiency_score = self._grade_efficiency(len(reasoning_steps), len(tool_calls))
-
-        # Calculate weighted overall score
-        overall_score = (
-            reasoning_score * self.weights["reasoning_quality"] +
-            tool_score * self.weights["tool_usage"] +
-            correctness_score * self.weights["correctness"] +
-            efficiency_score * self.weights["efficiency"]
-        )
-
-        # Generate feedback
-        feedback = self._generate_feedback(
-            reasoning_score, tool_score, correctness_score, efficiency_score
-        )
-
-        return TraceGrade(
-            trace_id=trace_id,
-            overall_score=overall_score,
-            reasoning_quality=reasoning_score,
-            tool_usage=tool_score,
-            correctness=correctness_score,
-            efficiency=efficiency_score,
-            feedback=feedback
-        )
-
-    def _extract_reasoning_steps(self, trace: List[Dict]) -> List[str]:
-        """Extract reasoning text from assistant messages."""
-        reasoning_steps = []
-        for message in trace:
-            if message.get("role") == "assistant":
-                try:
-                    content = json.loads(message.get("content", "{}"))
-                    if "reasoning" in content:
-                        reasoning_steps.append(content["reasoning"])
-                except json.JSONDecodeError:
+        if isinstance(data, dict):
+            new_dict = {}
+            for k, v in data.items():
+                if k in self.image_keys and isinstance(v, str):
+                    new_dict[k] = f"[Image data for key '{k}' was removed to save tokens]"
+                else:
+                    new_dict[k] = self._censor_images_in_trace(v)
+            return new_dict
+        elif isinstance(data, list):
+            new_list = []
+            for item in data:
+                if isinstance(item, dict) and item.get('type') == 'image_url':
                     continue
-        return reasoning_steps
-
-    def _extract_tool_calls(self, trace: List[Dict]) -> List[str]:
-        """Extract tool calls from trace."""
-        tools = []
-        for message in trace:
-            if message.get("role") == "assistant":
+                new_list.append(self._censor_images_in_trace(item))
+            return new_list
+        elif isinstance(data, str):
+            tool_output_prefix = "Tool output: "
+            if data.startswith(tool_output_prefix):
+                json_part = data[len(tool_output_prefix):]
                 try:
-                    content = json.loads(message.get("content", "{}"))
-                    if content.get("action") == "tool_call":
-                        tools.append(content.get("tool_name", "unknown"))
-                except json.JSONDecodeError:
-                    continue
-        return tools
+                    content = json.loads(json_part)
+                    censored_content = self._censor_images_in_trace(content)
+                    return f"{tool_output_prefix}{json.dumps(censored_content)}"
+                except (json.JSONDecodeError, TypeError):
+                    return data 
 
-    def _extract_final_answer(self, trace: List[Dict]) -> Optional[str]:
-        """Extract final answer from trace."""
-        for message in reversed(trace):
-            if message.get("role") == "assistant":
-                try:
-                    content = json.loads(message.get("content", "{}"))
-                    if content.get("action") == "final_answer":
-                        return content.get("text", "").strip()
-                except json.JSONDecodeError:
-                    continue
-        return None
+            try:
+                content = json.loads(data)
+                censored_content = self._censor_images_in_trace(content)
+                return json.dumps(censored_content)
+            except (json.JSONDecodeError, TypeError):
+                return data
+        return data
 
-    def _grade_reasoning_quality(self, reasoning_steps: List[str]) -> float:
-        """Grade reasoning quality (0-10)."""
-        if not reasoning_steps:
-            return 0.0
+    def _create_user_prompt(self, trace_data: Dict[str, Any]) -> str:
+        """Constructs the user prompt containing all the data for the LLM judge."""
+        censored_trace_data = self._censor_images_in_trace(copy.deepcopy(trace_data))
 
-        score = 5.0  # Base score
+        trace_for_prompt = censored_trace_data.get('trace', [])
 
-        # Check for logical progression
-        if len(reasoning_steps) > 1:
-            score += 1.0
+        final_json_for_prompt = json.dumps(trace_for_prompt, indent=2)
+        final_length = len(final_json_for_prompt)
+        logger.info(f"Censored trace JSON length: {final_length} characters")
 
-        # Check for detail and clarity (rough heuristic)
-        avg_length = sum(len(step) for step in reasoning_steps) / len(reasoning_steps)
-        if avg_length > 50:  # Reasonably detailed
-            score += 2.0
-        elif avg_length > 20:
-            score += 1.0
+        if final_length > 50000:
+            logger.warning("CENSORED TRACE IS STILL TOO LARGE. Finding the source of the leak...")
+            for i, message in enumerate(trace_for_prompt):
+                message_len = len(json.dumps(message))
+                if message_len > 10000:
+                    logger.error(f"  - Leaky Message Index: {i}")
+                    logger.error(f"  - Role: {message.get('role')}")
+                    logger.error(f"  - Content (start): {json.dumps(message.get('content'))[:400]}...")
+            logger.error("Censoring failed. The message above is likely the cause.")
 
-        # Check for specific spatial reasoning keywords
-        spatial_keywords = ["shape", "color", "position", "size", "compare", "identify"]
-        for step in reasoning_steps:
-            if any(keyword in step.lower() for keyword in spatial_keywords):
-                score += 0.5
+        return f"""
+Please evaluate the following reasoning trace based on its reasoning process and tool usage only. The correctness of the final answer is NOT relevant for this evaluation.
+
+**Question:** {censored_trace_data.get('question')}
+
+**Full Reasoning Trace (Image data has been REMOVED):**
+```json
+{final_json_for_prompt}
+```
+"""
+
+    def judge_trace(self, trace_data: Dict[str, Any]) -> bool:
+        """Sends the trace to the LLM for judgment and returns the boolean result."""
+        user_prompt = self._create_user_prompt(trace_data)
+
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": user_prompt},
+        ]
+
+        try:
+            response = self.llm_client.create_chat_completion(messages, max_tokens=10, temperature=0.0)
+            if response and "yes" in response.lower():
+                return True
+        except Exception as e:
+            print(f"  - An error occurred during LLM judgment: {e}")
+
+        return False
+
+    def process_and_curate_experiment(self, experiment_path: Path, output_dataset_path: Path, limit: Optional[int] = None):
+        """
+        Iterates through an experiment, grades each trace, and saves the curated dataset.
+        """
+        question_dirs_path = experiment_path / "questions"
+        if not question_dirs_path.exists():
+            print(f"Error: Could not find 'questions' directory in {experiment_path}")
+            return
+
+        print(f"Starting grading process for experiment: {experiment_path.name}")
+
+        beneficial_traces = []
+        question_dirs = sorted([d for d in question_dirs_path.iterdir() if d.is_dir()])
+        total_questions = len(question_dirs)
+
+        for i, q_dir in enumerate(question_dirs):
+            if limit and i >= limit:
+                print(f"\nReached processing limit of {limit} traces.")
                 break
 
-        return min(score, 10.0)
+            trace_file = q_dir / "traces" / "complete_trace.json"
+            if not trace_file.exists():
+                continue
 
-    def _grade_tool_usage(self, tool_calls: List[str], reasoning_steps: List[str]) -> float:
-        """Grade tool usage appropriateness (0-10)."""
-        if not tool_calls:
-            return 5.0 if len(reasoning_steps) == 1 else 3.0  # May not need tools
+            print(f"Processing trace {i+1}/{total_questions}: {q_dir.name[:70]}...")
 
-        score = 6.0  # Base for using tools
+            with open(trace_file, 'r') as f:
+                trace_data = json.load(f)
 
-        # Appropriate tool selection (sam2 for segmentation is good)
-        if "sam2" in tool_calls:
-            score += 2.0
+            is_beneficial = self.judge_trace(trace_data)
 
-        # Not too many tools (efficiency)
-        if len(tool_calls) <= 2:
-            score += 1.0
+            if is_beneficial:
+                print("  - Result: ✓ Beneficial")
+                beneficial_traces.append(trace_data)
+            else:
+                print("  - Result: ✗ Not Beneficial")
 
-        # Tool use matches reasoning
-        if tool_calls and any("segment" in step.lower() or "identify" in step.lower()
-                             for step in reasoning_steps):
-            score += 1.0
+            time.sleep(0.5)
 
-        return min(score, 10.0)
+        print(f"\nGrading complete. Accepted {len(beneficial_traces)} out of {total_questions if not limit else limit} processed traces.")
 
-    def _grade_correctness(self, final_answer: str, ground_truth: str) -> float:
-        """Grade answer correctness (0-10)."""
-        if not final_answer:
-            return 0.0
+        output_dataset_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_dataset_path, 'w') as f:
+            json.dump(beneficial_traces, f, indent=2)
 
-        if not ground_truth:
-            return 5.0  # Neutral if no ground truth
-
-        # Simple exact match (case-insensitive)
-        if final_answer.lower().strip() == ground_truth.lower().strip():
-            return 10.0
-
-        # Partial credit for yes/no questions
-        if ground_truth.lower() in ["yes", "no"]:
-            if final_answer.lower().startswith(ground_truth.lower()):
-                return 8.0
-
-        return 0.0
-
-    def _grade_efficiency(self, num_reasoning_steps: int, num_tool_calls: int) -> float:
-        """Grade efficiency (0-10)."""
-        total_steps = num_reasoning_steps + num_tool_calls
-
-        if total_steps <= 2:
-            return 10.0  # Very efficient
-        elif total_steps <= 4:
-            return 8.0   # Good
-        elif total_steps <= 6:
-            return 6.0   # Acceptable
-        else:
-            return 4.0   # Too many steps
-
-    def _generate_feedback(self, reasoning: float, tools: float,
-                          correctness: float, efficiency: float) -> str:
-        """Generate human-readable feedback."""
-        feedback_parts = []
-
-        if reasoning >= 8:
-            feedback_parts.append("Strong reasoning quality")
-        elif reasoning <= 4:
-            feedback_parts.append("Reasoning needs improvement")
-
-        if tools >= 8:
-            feedback_parts.append("Good tool usage")
-        elif tools <= 4:
-            feedback_parts.append("Poor tool selection")
-
-        if correctness >= 8:
-            feedback_parts.append("Correct answer")
-        elif correctness == 0:
-            feedback_parts.append("Incorrect answer")
-
-        if efficiency >= 8:
-            feedback_parts.append("Efficient solution")
-        elif efficiency <= 4:
-            feedback_parts.append("Too many steps")
-
-        return "; ".join(feedback_parts) if feedback_parts else "Average performance"
-
-    def grade_dataset(self, traces_path: Path, ground_truth_path: Path = None) -> List[TraceGrade]:
-        """Grade multiple traces."""
-        # Load traces
-        with open(traces_path, 'r') as f:
-            traces = json.load(f)
-
-        # Load ground truth if available
-        ground_truth = {}
-        if ground_truth_path and ground_truth_path.exists():
-            with open(ground_truth_path, 'r') as f:
-                ground_truth = json.load(f)
-
-        grades = []
-        for trace_data in traces:
-            trace_id = trace_data.get("id", "unknown")
-            gt = ground_truth.get(trace_id)
-            grade = self.grade_trace(trace_data, gt)
-            grades.append(grade)
-
-        return grades
-
-    def calculate_summary_stats(self, grades: List[TraceGrade]) -> Dict[str, float]:
-        """Calculate summary statistics."""
-        if not grades:
-            return {}
-
-        return {
-            "average_overall": sum(g.overall_score for g in grades) / len(grades),
-            "average_reasoning": sum(g.reasoning_quality for g in grades) / len(grades),
-            "average_tool_usage": sum(g.tool_usage for g in grades) / len(grades),
-            "average_correctness": sum(g.correctness for g in grades) / len(grades),
-            "average_efficiency": sum(g.efficiency for g in grades) / len(grades),
-            "total_graded": len(grades)
-        }
+        print(f"Successfully saved curated dataset to: {output_dataset_path}")
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+    parser = argparse.ArgumentParser(description="Use an LLM to grade and curate reasoning traces from an experiment.")
+    parser.add_argument("--experiment_path", type=Path, required=True,
+                        help="Path to the experiment directory to be graded.")
+    parser.add_argument("--output_dataset_name", type=str, required=True,
+                        help="The filename for the new curated dataset (e.g., 'curated_v1.json').")
+    parser.add_argument("--limit", type=int, default=None,
+                        help="Optional: The maximum number of traces to process.")
+
+    args = parser.parse_args()
+
+    output_path = Path(__file__).parent / "dataset" / args.output_dataset_name
+
     grader = TraceGrader()
-
-    # Example: grade quality traces
-    if Path("evaluation/quality_traces.json").exists():
-        grades = grader.grade_dataset(Path("evaluation/quality_traces.json"))
-        stats = grader.calculate_summary_stats(grades)
-
-        print("Grading Results:")
-        for key, value in stats.items():
-            print(f"{key}: {value:.2f}")
-
-        # Show detailed grades for first few traces
-        for grade in grades[:3]:
-            print(f"\nTrace {grade.trace_id}:")
-            print(f"  Overall: {grade.overall_score:.1f}/10")
-            print(f"  Feedback: {grade.feedback}")
+    grader.process_and_curate_experiment(args.experiment_path, output_path, limit=args.limit)

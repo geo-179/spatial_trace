@@ -162,12 +162,12 @@ def export_subset(data_dir: str,
     counting_count = sum(1 for row in rows if str(row['answer']).isdigit())
 
     print(f"\n✔ {len(rows)} mixed questions exported to {out_dir}")
-    print(f"  📊 Distribution:")
+    print(f"   Distribution:")
     print(f"    • Easy questions: {easy_count}")
     print(f"    • Hard questions: {hard_count}")
     print(f"    • Yes/No questions: {yes_no_count}")
     print(f"    • Counting questions: {counting_count}")
-    print(f"  📁 Files:")
+    print(f"   Files:")
     print(f"    • CSV: {csv_path.name}")
     print(f"    • Images: {img_dst_root.relative_to(out_dir)}/*")
 

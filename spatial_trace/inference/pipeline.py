@@ -1,6 +1,3 @@
-"""
-Main spatial reasoning pipeline with integrated verification.
-"""
 import json
 import logging
 from pathlib import Path
@@ -46,12 +43,10 @@ class SpatialReasoningPipeline:
         self.max_regeneration_attempts = max_regeneration_attempts
         self.current_trace_tool_images = []  # Track tool images for current trace
 
-        # Initialize verifier if enabled
         self.verifier = TraceVerifier(min_acceptable_rating=min_acceptable_rating)
         if enable_verification:
             logger.info("Verification enabled in pipeline")
 
-        # Configure tools from environment if not already done
         if not self.tool_registry.list_tools():
             logger.info("Configuring tools from environment variables")
             self.tool_registry.configure_from_env()
@@ -75,18 +70,15 @@ class SpatialReasoningPipeline:
         Returns:
             Complete reasoning trace as a list of message dictionaries
         """
-        # Clear tool images for new trace
         self.current_trace_tool_images = []
 
         logger.info(f"Starting reasoning trace for question: '{question}'")
         logger.info(f"Image path: {image_path}")
         logger.info(f"Verification enabled: {self.enable_verification}")
 
-        # Validate inputs
         if not self._validate_inputs(question, image_path):
             return []
 
-        # Initialize the trace
         trace = self._initialize_trace(question, image_path, prompt_name)
         if not trace:
             logger.error("Failed to initialize reasoning trace")
@@ -94,18 +86,15 @@ class SpatialReasoningPipeline:
 
         current_image_path = image_path
 
-        # Main reasoning loop
         for step in range(self.max_steps):
             logger.info(f"Reasoning step {step + 1}/{self.max_steps}")
 
-            # Generate step with potential regeneration
             success = self._generate_verified_step(trace, step, question, current_image_path)
 
             if not success:
                 logger.error(f"Failed to generate valid step {step + 1}")
                 break
 
-            # Check if we have a final answer
             last_message = trace[-1] if trace else None
             if last_message and last_message.get("role") == "assistant":
                 try:
@@ -122,7 +111,6 @@ class SpatialReasoningPipeline:
         logger.info(f"Reasoning trace completed with {len(trace)} messages")
         logger.info(f"Tool images generated: {len(self.current_trace_tool_images)}")
 
-        # Track tool usage and trace statistics
         self._track_tool_call_statistics(trace)
 
         return trace
@@ -140,33 +128,26 @@ class SpatialReasoningPipeline:
             if attempt > 0:
                 logger.info(f"Regeneration attempt {attempt}/{self.max_regeneration_attempts} for step {step_index + 1}")
 
-            # Create a working trace for this attempt (includes feedback for context)
             working_trace = trace.copy()
 
-            # Add improvement feedback to working trace for LLM context (but not final trace)
             if attempt > 0 and self.enable_verification and last_verification_result:
                 improvement_message = self._create_improvement_message(last_verification_result)
                 working_trace.append(improvement_message)
 
-            # Get LLM response using working trace
-            response_text = self._get_llm_response(working_trace)
             if not response_text:
                 logger.error(f"Failed to get LLM response at step {step_index + 1}, attempt {attempt + 1}")
                 continue
 
-            # Parse the response
             success, parsed_data, error = OutputParser.parse_llm_response(response_text)
             if not success:
                 logger.error(f"Failed to parse LLM response: {error}")
                 if attempt < self.max_regeneration_attempts:
-                    # Add error feedback to working trace for next attempt
                     error_message = {"role": "user", "content": f"Error: {error}. Please provide a valid JSON response."}
                     working_trace.append(error_message)
                     continue
                 else:
                     return False
 
-            # Verify step if verification is enabled
             if self.enable_verification:
                 verification_result = self.verifier.verify_step(
                     step_content=response_text,
@@ -174,7 +155,7 @@ class SpatialReasoningPipeline:
                     full_trace=trace,
                     question=question,
                     image_path=current_image_path,
-                    attempt_number=attempt + 1  # Track attempt number
+                    attempt_number=attempt + 1  
                 )
 
                 last_verification_result = verification_result
@@ -183,15 +164,12 @@ class SpatialReasoningPipeline:
                     logger.info(f"Step {step_index + 1} failed verification (rating: {verification_result.rating})")
 
                     if attempt < self.max_regeneration_attempts:
-                        # Continue to next attempt (feedback goes to working trace only)
                         continue
                     else:
                         logger.warning(f"Max attempts reached, accepting step with rating {verification_result.rating}")
 
-            # Step is acceptable - add ONLY the successful response to main trace
             trace.append({"role": "assistant", "content": response_text})
 
-            # Process the action
             action_type, action_info = OutputParser.extract_action_info(parsed_data)
 
             if action_type == ActionType.FINAL_ANSWER:
@@ -207,22 +185,17 @@ class SpatialReasoningPipeline:
                 logger.info(f"AI reasoning: {reasoning}")
                 logger.info(f"AI requested tool: {tool_name}")
 
-                # Execute tool
                 tool_message, tool_image_path = self._execute_tool(tool_name, current_image_path)
 
-                # Track and safely copy tool image
                 if tool_image_path and tool_image_path.exists():
-                    # Create unique filename immediately
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
                     unique_filename = f"{tool_name.lower()}_{step_index + 1}_{attempt + 1}_{timestamp}.png"
                     safe_tool_path = tool_image_path.parent / unique_filename
 
                     try:
-                        # Copy immediately to prevent overwriting
                         shutil.copy2(tool_image_path, safe_tool_path)
                         logger.info(f"Safely copied tool output: {safe_tool_path}")
 
-                        # Track the safe copy
                         tool_image_info = {
                             "step_index": step_index + 1,
                             "attempt": attempt + 1,
@@ -235,7 +208,6 @@ class SpatialReasoningPipeline:
 
                     except Exception as e:
                         logger.error(f"Failed to copy tool image: {e}")
-                        # Fallback to original path
                         tool_image_info = {
                             "step_index": step_index + 1,
                             "attempt": attempt + 1,
@@ -246,7 +218,6 @@ class SpatialReasoningPipeline:
                         }
                         self.current_trace_tool_images.append(tool_image_info)
 
-                # Add tool result to trace
                 tool_result_message = self._create_tool_result_message(tool_message, tool_image_path)
                 trace.append(tool_result_message)
                 return True
@@ -291,13 +262,11 @@ Please provide a better response that addresses these concerns."""
     ) -> Optional[List[Dict[str, Any]]]:
         """Initialize the reasoning trace with system prompt and first user message."""
         try:
-            # Encode the initial image
             base64_image = encode_image_to_base64(image_path)
             if not base64_image:
                 logger.error("Failed to encode initial image")
                 return None
 
-            # Create initial messages
             messages = self.prompt_manager.create_initial_messages(
                 question, base64_image, prompt_name
             )
@@ -312,7 +281,6 @@ Please provide a better response that addresses these concerns."""
     def _get_llm_response(self, trace: List[Dict[str, Any]]) -> Optional[str]:
         """Get response from LLM."""
 
-        # Count images vs text for essential diagnostics
         multimodal_count = sum(1 for msg in trace if isinstance(msg.get("content"), list))
         logger.info(f"Sending {len(trace)} messages ({multimodal_count} with images) to LLM")
 
@@ -345,18 +313,15 @@ Please provide a better response that addresses these concerns."""
         """Create a message for tool results."""
 
         if new_image_path and new_image_path.exists():
-            # Encode the new image
             new_base64_image = encode_image_to_base64(new_image_path)
 
             if new_base64_image:
-                # Create message with image
                 message = self.prompt_manager.create_tool_result_message(tool_message, new_base64_image)
                 logger.info("Tool output with image included")
                 return message
             else:
                 logger.error(f"Failed to encode tool image: {new_image_path}")
 
-        # Fallback to text-only message
         logger.info("Tool output text-only")
         return self.prompt_manager.create_tool_result_message(tool_message)
 
@@ -414,7 +379,6 @@ Please provide a better response that addresses these concerns."""
             tool_summary = ", ".join(f"{tool}: {count}" for tool, count in by_tool.items())
             logger.info(f"Tool calls: {tool_summary}")
 
-        # Also add detailed analysis of final trace
         text_only_messages = 0
         multimodal_messages = 0
         for message in trace:
@@ -428,51 +392,67 @@ Please provide a better response that addresses these concerns."""
         logger.info(f"Final trace: {len(trace)} messages, {image_inclusion_rate:.1f}% with images")
 
     def verify_and_regenerate_step_if_needed(self, trace: List[Dict[str, Any]], last_response: str, step_index: int, question: str, image_path: Path) -> Tuple[str, bool]:
-        """Verify a step and regenerate it if it's below the quality threshold."""
+        """
+        Verify a step. If it's good enough, accept it. If not, run a regeneration loop
+        and select the best response from all attempts within that loop.
+        """
         if not self.enable_verification:
             return last_response, True
 
-        # Always run verification to get a rating, which is stored in the history.
-        verification_result = self.verifier.verify_step(
+        initial_verification_result = self.verifier.verify_step(
             step_content=last_response,
             step_index=step_index,
             full_trace=trace,
             question=question,
-            image_path=image_path
+            image_path=image_path,
+            attempt_number=1
         )
 
-        # CRITICAL CHANGE: If regeneration is disabled, exit here.
-        # We have the rating we need for analysis, but we will not act on it.
-        if not self.enable_regeneration:
+        if not self.enable_regeneration or not self.verifier.should_regenerate_step(initial_verification_result):
             return last_response, True
 
-        # --- Regeneration Loop ---
-        # This code is now only reachable if regeneration is enabled.
+        logger.info(f"Step {step_index} failed verification (rating: {initial_verification_result.rating}). Starting regeneration loop to find best response.")
+
+        step_attempts = [{
+            "response": last_response,
+            "rating": initial_verification_result.rating
+        }]
+
+        working_trace = trace[:-1]
+
         for attempt in range(self.max_regeneration_attempts):
-            if not self.verifier.should_regenerate_step(verification_result):
-                return last_response, True
+            logger.info(f"Regeneration attempt {attempt + 1}/{self.max_regeneration_attempts} for step {step_index}")
 
-            # Regenerate the step
-            logger.info(f"Regenerating step {step_index + 1}, attempt {attempt + 1}")
-            new_response = self._get_llm_response(trace)
+            last_attempt_result = self.verifier.get_verification_history()[-1]
+            error_message = self.prompt_manager.create_verification_feedback_message(last_attempt_result['result'])
+
+            temp_trace = working_trace + [error_message]
+            new_response = self._get_llm_response(temp_trace)
+
             if not new_response:
-                logger.error(f"Failed to get LLM response for regeneration at step {step_index + 1}, attempt {attempt + 1}")
-                return last_response, False
+                logger.error("Failed to get a new response from LLM during regeneration.")
+                continue
 
-            # Verify the regenerated step
-            verification_result = self.verifier.verify_step(
+            new_verification_result = self.verifier.verify_step(
                 step_content=new_response,
-                step_index=step_index + 1,
-                full_trace=trace,
+                step_index=step_index,
+                full_trace=working_trace,
                 question=question,
-                image_path=image_path
+                image_path=image_path,
+                attempt_number=attempt + 2
             )
 
-            # If the regenerated step is acceptable, return it
-            if self.verifier.should_regenerate_step(verification_result):
-                logger.info(f"Regenerated step {step_index + 1} accepted (rating: {verification_result.rating})")
-                return new_response, True
+            step_attempts.append({
+                "response": new_response,
+                "rating": new_verification_result.rating
+            })
 
-        # If all attempts fail, return the original response
-        logger.warning(f"Max attempts reached, accepting step with rating {verification_result.rating}")
-        return last_response, False
+            if new_verification_result.rating == 10:
+                logger.info("Achieved perfect score (10/10) on regeneration. Selecting this response.")
+                break
+
+        best_attempt = max(step_attempts, key=lambda x: x["rating"])
+
+        logger.info(f"Regeneration complete. Selected best response for step {step_index} with rating {best_attempt['rating']}.")
+
+        return best_attempt["response"], True

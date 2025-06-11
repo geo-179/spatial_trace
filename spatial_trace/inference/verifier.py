@@ -73,7 +73,7 @@ class TraceVerifier:
         logger.info(f"Verifying step {step_index}, attempt {attempt_number}: {step_content[:100]}...")
 
         # Retry logic for API failures
-        max_retries = 2
+        max_retries = 3
         for retry in range(max_retries + 1):
             try:
                 # Create verification prompt
@@ -125,6 +125,19 @@ class TraceVerifier:
 
                 result = VerificationResult(verification_data)
 
+                # Determine the authoritative regeneration decision based on our threshold.
+                authoritative_regeneration_needed = self.should_regenerate_step(result)
+
+                # Log both the LLM's suggestion and our final decision for clarity.
+                logger.info(
+                    f"Step {step_index} verified - Rating: {result.rating}/10, "
+                    f"LLM Suggestion: {result.regeneration_needed}, "
+                    f"ACTUAL REGENERATION: {authoritative_regeneration_needed}"
+                )
+
+                # CRITICAL: Ensure the returned result object has the correct, authoritative value.
+                result.regeneration_needed = authoritative_regeneration_needed
+
                 # Enhanced history entry with attempt tracking
                 self.verification_history.append({
                     "step_index": step_index,
@@ -133,12 +146,9 @@ class TraceVerifier:
                     "step_content": step_content[:200],  # Save snippet for reference
                     "result": result.to_dict(),
                     "passed_threshold": result.rating >= self.min_acceptable_rating,
-                    "regeneration_triggered": self.should_regenerate_step(result),
+                    "regeneration_triggered": authoritative_regeneration_needed,
                     "verification_retries": retry
                 })
-
-                logger.info(f"Step {step_index} verified - Rating: {result.rating}/10, "
-                           f"Regeneration needed: {result.regeneration_needed}")
 
                 return result
 
@@ -321,7 +331,8 @@ Provide your verification assessment in the required JSON format."""
 
     def should_regenerate_step(self, verification_result: VerificationResult) -> bool:
         """
-        Determine if a step should be regenerated based on verification.
+        Determine if a step should be regenerated based ONLY on the rating threshold.
+        The LLM's suggestion is ignored to enforce our quality gate.
 
         Args:
             verification_result: Result from step verification
@@ -329,13 +340,9 @@ Provide your verification assessment in the required JSON format."""
         Returns:
             True if step should be regenerated
         """
-        # Check explicit regeneration flag
-        if verification_result.regeneration_needed:
-            return True
-
-        # Check rating threshold
+        # The decision is made entirely based on the numeric rating.
         if verification_result.rating < self.min_acceptable_rating:
-            logger.info(f"Step rating {verification_result.rating} below threshold {self.min_acceptable_rating}")
+            # The log message was moved to verify_step for better context.
             return True
 
         return False

@@ -31,12 +31,8 @@ Note for final answer text, you MUST answer with ONE of the possible answer choi
 
 Always provide clear reasoning that explains your thought process before taking the action.
 
-Guidelines for effective spatial reasoning:
-- Start by understanding what objects and spatial relationships the question asks about
-- Use tools when you need to better understand the scene (segmentation, depth)
-- Reason step by step, building up your understanding
-- Be precise in your final answer - match the expected format (Yes/No, number, etc.)
-- If you're uncertain, use tools to gather more information before concluding
-- MAXIMIZE the step by step thinking following each tool call output. Think CRITICALLY and CAREFULLY from multiple tool call sources.
-- Call each tool once, rather than repeatedly calling the same tool.
-- After each tool call, please DESCRIBE the IMAGE thoroughly before providing an reasoning.
+Binding Rules for effective spatial reasoning:
+Strategic Information Gathering: Use diverse tools strategically to build comprehensive scene understanding - each tool should serve a specific purpose and provide complementary perspectives on spatial relationships. Prioritize gathering the most accurate and reliable information available before drawing conclusions.
+Maximize Analysis Depth: After each tool call, DESCRIBE the IMAGE thoroughly and think CRITICALLY from multiple sources. Integrate information from diverse perspectives to build incremental understanding, cross-validating findings when possible to increase confidence.
+Systematic Investigation: Call each tool once strategically rather than repeatedly, making each usage count for maximum information extraction. Use additional complementary tools from different analytical angles if uncertain about spatial relationships.
+Evidence-Based Conclusions: Only provide your final answer after gathering sufficient high-quality information from multiple sources. Match the expected format (Yes/No, number, etc.) with confidence backed by thorough spatial investigation and diverse analytical perspectives.

@@ -1,6 +1,3 @@
-"""
-Utilities for evaluation scripts.
-"""
 import json
 import pandas as pd
 from pathlib import Path
@@ -16,7 +13,6 @@ def load_traces(traces_path: Path) -> List[Dict[str, Any]]:
         with open(traces_path, 'r') as f:
             traces = json.load(f)
 
-        # Handle both single trace and list of traces
         if isinstance(traces, dict):
             return [traces]
         return traces
@@ -117,7 +113,6 @@ def extract_final_answers(traces: List[Dict[str, Any]]) -> List[Optional[str]]:
         trace = trace_data.get("trace", [])
         answer = None
 
-        # Look for final answer in reverse order
         for message in reversed(trace):
             if message.get("role") == "assistant":
                 try:
@@ -167,10 +162,8 @@ def setup_evaluation_logging(log_level: str = "INFO"):
 
 
 if __name__ == "__main__":
-    # Test utilities
     setup_evaluation_logging()
 
-    # Test loading experiment traces
     experiments_dir = Path("spatial_trace/spatial_trace/evaluation/experiments")
     if experiments_dir.exists():
         for exp_dir in experiments_dir.iterdir():

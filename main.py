@@ -21,7 +21,7 @@ class Arguments(Tap):
     """Command line arguments for the spatial trace demo."""
     max_steps: int = 10  # Maximum number of reasoning steps
     # question_idx: int = 1  # Index of question to process from dataset
-    verify: bool = False
+    verify: bool = True
     number_questions: int = 100 # Number of questions to process from dataset
     data_dir: str = "data/clevr_human_subset"  # Path to data directory
     output_file: str = "example_trace.json"  # Output file for trace results
@@ -73,7 +73,7 @@ def main():
     pipeline = SpatialReasoningPipeline(
         max_steps=args.max_steps,
         enable_verification=args.verify,
-        min_acceptable_rating=6.0,
+        min_acceptable_rating=4.0,
         max_regeneration_attempts=2
     )
 

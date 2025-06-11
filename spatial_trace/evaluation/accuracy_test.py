@@ -1,6 +1,3 @@
-"""
-Test accuracy under different conditions for ablation study.
-"""
 import json
 import pandas as pd
 from pathlib import Path
@@ -74,22 +71,18 @@ class AccuracyTester:
         config = self.test_conditions[condition_name]
         logger.info(f"Testing condition '{condition_name}' with config: {config}")
 
-        # Setup pipeline for this condition
         pipeline = SpatialReasoningPipeline(**config)
 
-        # Load dataset
         data = read_csv_data(dataset_path)
         if data is None:
             raise ValueError(f"Could not load dataset from {dataset_path}")
 
-        # Load ground truth if available
         ground_truth = {}
         if ground_truth_path and ground_truth_path.exists():
             if ground_truth_path.suffix == '.json':
                 with open(ground_truth_path, 'r') as f:
                     ground_truth = json.load(f)
             else:
-                # Assume CSV with columns: image_path, answer
                 gt_data = pd.read_csv(ground_truth_path)
                 ground_truth = dict(zip(gt_data['image_path'], gt_data['answer']))
 
@@ -97,7 +90,6 @@ class AccuracyTester:
         correct_count = 0
         failed_count = 0
 
-        # Test samples
         for idx, row in data.head(max_samples).iterrows():
             try:
                 question = row['question']
@@ -105,14 +97,11 @@ class AccuracyTester:
 
                 logger.info(f"Testing sample {idx}: {question}")
 
-                # Generate trace
                 trace = pipeline.generate_reasoning_trace(question, image_path)
 
                 if trace:
-                    # Extract final answer
                     final_answer = self._extract_final_answer(trace)
 
-                    # Check correctness
                     is_correct = False
                     expected_answer = ground_truth.get(row['image_path']) or ground_truth.get(str(image_path))
 
@@ -145,7 +134,6 @@ class AccuracyTester:
                 failed_count += 1
                 logger.error(f"Error processing sample {idx}: {e}")
 
-        # Calculate accuracy
         total_tested = len(results)
         accuracy = correct_count / total_tested if total_tested > 0 else 0.0
 
@@ -175,15 +163,12 @@ class AccuracyTester:
         pred_clean = predicted.lower().strip()
         exp_clean = expected.lower().strip()
 
-        # Exact match
         if pred_clean == exp_clean:
             return True
 
-        # For yes/no questions, check if answer starts with expected
         if exp_clean in ["yes", "no"]:
             return pred_clean.startswith(exp_clean)
 
-        # For numeric answers, try to extract numbers
         try:
             pred_num = float(pred_clean)
             exp_num = float(exp_clean)
@@ -229,7 +214,6 @@ class AccuracyTester:
         report = "\nAblation Study Results Summary:\n"
         report += "=" * 50 + "\n"
 
-        # Sort by accuracy
         sorted_results = sorted(results.items(), key=lambda x: x[1].accuracy, reverse=True)
 
         for condition, result in sorted_results:
@@ -238,7 +222,6 @@ class AccuracyTester:
             report += f"Correct: {result.correct_answers:2}/{result.total_samples:2} | "
             report += f"Failed: {result.failed_traces:2}\n"
 
-        # Best vs worst comparison
         if len(sorted_results) >= 2:
             best = sorted_results[0]
             worst = sorted_results[-1]
@@ -270,15 +253,12 @@ class AccuracyTester:
 if __name__ == "__main__":
     tester = AccuracyTester()
 
-    # Run ablation study
     results = tester.run_ablation_study(
         dataset_path=Path("data/clevr_easy_subset/subset.csv"),
-        ground_truth_path=None,  # Add ground truth file if available
-        max_samples=10  # Start small for testing
+        ground_truth_path=None,
+        max_samples=10
     )
 
-    # Print comparison
     print(tester.compare_conditions(results))
 
-    # Save detailed results
     tester.save_results(results, Path("evaluation/ablation_results.json"))
